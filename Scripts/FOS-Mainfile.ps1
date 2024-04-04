@@ -3,6 +3,12 @@
 $ErrorActionPreference="SilentlyContinue"
 $DebugPreference="Continue"
 
+<#
+$Credantails = Device_Credantials
+$Proto=$Credantails.Protocol
+$UserName =$Credantails.UserName
+$Credantails.IPAddress |ForEach-Object {Write-Host "test $_"}
+#>
 #region Hashtables
 <#--------- Hashtable for BasicSwitch Info ------------#>
 $FOS_SwGeneralInfos =[ordered]@{}

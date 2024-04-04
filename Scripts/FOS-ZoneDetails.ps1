@@ -1,5 +1,5 @@
 using namespace System.Net
-
+$DebugPreference="Continue"
 function FOS_Zone_Details {
         <#
         .SYNOPSIS
@@ -29,6 +29,7 @@ function FOS_Zone_Details {
         [ipaddress]$SwitchIP,
         [Parameter(ValueFromPipeline)]
         [ValidateSet("peerzone")]
+        [string]$FOS_Operand
     )
     begin{
         Write-Debug -Message "Begin block |$(Get-Date)"

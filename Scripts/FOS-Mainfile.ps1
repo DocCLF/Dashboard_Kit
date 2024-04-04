@@ -1,6 +1,7 @@
 
 # there a lot of "errors" in combination with substring Parameter, thats why "silentlycontinue"
 $ErrorActionPreference="SilentlyContinue"
+$DebugPreference="Continue"
 
 #region Hashtables
 <#--------- Hashtable for BasicSwitch Info ------------#>

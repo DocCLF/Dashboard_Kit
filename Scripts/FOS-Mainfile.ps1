@@ -28,11 +28,11 @@ $FOS_LoSw_CFG = (($FOS_advInfo | Select-String -Pattern 'FID:\s(\d+)$' -AllMatch
 
 <# Collect some information for the Hastable, which is used for Basic SwitchInfos
 if($Credantails.Protocol -eq 'plink'){
-    $FOS_advInfo = plink $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR -pw $Credantails.FOSCredPW -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow"
+    $FOS_advInfo = plink $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR -pw $Credantails.FOSCredPW -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow"
    # $FOS_swsh_temp = plink $FOS_UserName@$FOS_DeviceIPADDR -pw $FOSCredPW -batch "switchshow"
 }else {
 
-    $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow"
+    $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow"
 }
 #>
 $FOS_advInfo = Get-Content -Path ".\ip_vers.txt" #|Select-Object -Skip 2

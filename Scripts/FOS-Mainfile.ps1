@@ -15,59 +15,79 @@ $Credantails.IPAddress |ForEach-Object {Write-Host "test $_"}
 $FOS_SwGeneralInfos =[ordered]@{}
 <#----- Hashtable Unique information of the switch ----#>
 $FOS_SwBasicInfos =[ordered]@{}
+<#----- Array Unique information of the switchports ----#>
+$FOS_SwBasicPortDetails=@()
+$FOS_usedPorts =@()
+<#----- Array Unique information of the switch used at Porterrshow ----#>
+$FOS_usedPortsfiltered =@()
+<#----- Array Unique information of the switch used at portbuffershow ----#>
+$FOS_pbs =@()
 #endregion
 
 
-<#--------------------Test maybe for later use -------------------#>
-# the line below is only a test maybe usfull for later to check if one or more FIDs online at one switch
-$FOS_LoSw_CFG = (($FOS_advInfo | Select-String -Pattern 'FID:\s(\d+)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)',''
+<#--------------------Testarea maybe for later use -------------------#>
+<# nothing included at the moment #>
 <#---------------------------------------#>
+
+#region DataCollect 
+<# Collect some information for the Hastable, which is used for Basic SwitchInfos
+if($Credantails.Protocol -eq 'plink'){
+    $FOS_advInfo = plink $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR -pw $Credantails.FOSCredPW -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
+}else {
+    $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
+}
+#>
+$FOS_advInfo = Get-Content -Path ".\swSmal_col.txt"
+<#----------------------- DataCollect ------------------#>
+#endregion
 
 
 #region Switchshow
 
-<# Collect some information for the Hastable, which is used for Basic SwitchInfos
-if($Credantails.Protocol -eq 'plink'){
-    $FOS_advInfo = plink $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR -pw $Credantails.FOSCredPW -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow"
-   # $FOS_swsh_temp = plink $FOS_UserName@$FOS_DeviceIPADDR -pw $FOSCredPW -batch "switchshow"
-}else {
-
-    $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow"
-}
-#>
-$FOS_advInfo = Get-Content -Path ".\ip_vers.txt" #|Select-Object -Skip 2
-# Select all needed Infos
+# Collect all needed Infos
 $FOS_FW_Info = ($FOS_advInfo | Select-String -Pattern '([v?][\d]\.[\d+]\.[\d]\w)$' -AllMatches).Matches.Value |Select-Object -Unique
 $FOS_IP_AddrCFG = ($FOS_advInfo | Select-String -Pattern '(?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})').Matches.Value |Select-Object -Unique
 $FOS_DHCP_CFG = (($FOS_advInfo | Select-String -Pattern '^DHCP:\s(\w+)$' -AllMatches).Matches.Value |Select-Object -Unique).Trim('DHCP: ')
+$FOS_temp = ($FOS_advInfo | Select-String -Pattern 'switchType:\s(.*)$','switchState:\s(.*)$','switchRole:\s(.*)$' |ForEach-Object {$_.Matches.Groups[1].Value}).Trim()
 
-#$FOS_pbs_temp = plink insight@192.168.107.40 -pw Insight0Mon -batch "portbuffershow" 
-#$FOS_swsh_temp = Get-Content -Path ".\swsh.txt"
-$FOS_SwBasicPortDetails=@()
-$FOS_usedPorts =@()
+<# Make the product type understandable for people. ;) #>
+if($FOS_temp[2] -like "1*"){
+    # with VF jump in here
+    switch ($FOS_temp[2]) {
+        {$_ -like "170*"}  { $FOS_SwHw = "Brocade G610" }
+        {$_ -like "162*"}  { $FOS_SwHw = "Brocade G620" }
+        {$_ -like "183*"}  { $FOS_SwHw = "Brocade G620" }
+        {$_ -like "173*"}  { $FOS_SwHw = "Brocade G630" }
+        {$_ -like "184*"}  { $FOS_SwHw = "Brocade G630" }
+        {$_ -like "178*"}  { $FOS_SwHw = "Brocade 7810 Extension Switch" }
+        {$_ -like "181*"}  { $FOS_SwHw = "Brocade G720" }
+        {$_ -like "189*"}  { $FOS_SwHw = "Brocade G730" }
+        Default {$FOS_SwHw = "Unknown Type"}
+    }
+    $FOS_StateTemp =$FOS_temp[3]
+    $FOS_RoleTemp =$FOS_temp[4]
+}else {
+    # else jump in here
+    switch ($FOS_temp[1]) {
+        {$_ -like "170*"}  { $FOS_SwHw = "Brocade G610" }
+        {$_ -like "162*"}  { $FOS_SwHw = "Brocade G620" }
+        {$_ -like "183*"}  { $FOS_SwHw = "Brocade G620" }
+        {$_ -like "173*"}  { $FOS_SwHw = "Brocade G630" }
+        {$_ -like "184*"}  { $FOS_SwHw = "Brocade G630" }
+        {$_ -like "178*"}  { $FOS_SwHw = "Brocade 7810 Extension Switch" }
+        {$_ -like "181*"}  { $FOS_SwHw = "Brocade G720" }
+        {$_ -like "189*"}  { $FOS_SwHw = "Brocade G730" }
+        Default {$FOS_SwHw = "Unknown Type"}
+    }
+    $FOS_StateTemp =$FOS_temp[2]
+    $FOS_RoleTemp =$FOS_temp[3]
+}
+
+
 foreach($FOS_linebyLine in $FOS_advInfo){
+        <# Only collect data up to the next section, marked by frames #>
         if($FOS_linebyLine -match '^\s+frames'){break}
-        # select some Basic Switch Infos
-        $FOS_temp += Select-String -InputObject $FOS_linebyLine -Pattern 'switchType:\s(.*)$','switchState:\s(.*)$','switchRole:\s(.*)$' |ForEach-Object {$_.Matches.Groups[1].Value}
 
-        # Split FOS_temp in parts, the regex \s means any whitespace character, + means one or more
-        $FOS_SwInfo = $FOS_temp.Trim() -split ("\s+")
-
-        # make the Switch Typ readable without using google ;)
-        if($FOS_SwInfo[0] -ne ""){
-            switch ($FOS_SwInfo[0]) {
-                {$_ -like "170*"}  { $FOS_SwHw = "Brocade G610" }
-                {$_ -like "162*"}  { $FOS_SwHw = "Brocade G620" }
-                {$_ -like "183*"}  { $FOS_SwHw = "Brocade G620" }
-                {$_ -like "173*"}  { $FOS_SwHw = "Brocade G630" }
-                {$_ -like "184*"}  { $FOS_SwHw = "Brocade G630" }
-                {$_ -like "178*"}  { $FOS_SwHw = "Brocade 7810 Extension Switch" }
-                {$_ -like "181*"}  { $FOS_SwHw = "Brocade G720" }
-                {$_ -like "189*"}  { $FOS_SwHw = "Brocade G730" }
-                Default {$FOS_SwHw = $FOS_SwInfo[0]}
-            }
-        }
-        
         # add more Basic Infos of the switch to the Hashtable
         $FOS_SwGeneralInfos.Add('Brocade Product Name',$FOS_SwHw)
         $FOS_SwGeneralInfos.Add('FOS Version',$FOS_FW_Info)
@@ -75,8 +95,8 @@ foreach($FOS_linebyLine in $FOS_advInfo){
         $FOS_SwGeneralInfos.Add('Ethernet Subnet mask',$FOS_IP_AddrCFG[1])
         $FOS_SwGeneralInfos.Add('Gateway IP Address',$FOS_IP_AddrCFG[2])
         $FOS_SwGeneralInfos.Add('DHCP',$FOS_DHCP_CFG)
-        $FOS_SwGeneralInfos.Add('Switch State',$FOS_SwInfo[1])
-        $FOS_SwGeneralInfos.Add('Switch Role',$FOS_SwInfo[2])
+        $FOS_SwGeneralInfos.Add('Switch State',$FOS_StateTemp)
+        $FOS_SwGeneralInfos.Add('Switch Role',$FOS_RoleTemp)
         
         
         # Build the Portsection of switchshow
@@ -99,10 +119,10 @@ foreach($FOS_linebyLine in $FOS_advInfo){
 #endregion
 
 
-#region Logical Switch/ FID Infos
+#region LogicalSwitch
+<#----------- LogicalSwitch/ FID Infos -----------#>
 <#----------- Unique information of the switch -----------#>
-#Clear-Variable -Name FOS_advInfo
-#$FOS_advInfo = Get-Content -Path ".\lscfg.txt"
+
 $FOS_LoSw_CFG = (($FOS_advInfo | Select-String -Pattern 'FID:\s(\d+)$','SwitchType:\s(\w+)$','DomainID:\s(\d+)$','SwitchName:\s(.*)$','FabricName:\s(\w+)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)',''
 
 $FOS_LoSwAdd_CFG = ((($FOS_advInfo | Select-String -Pattern '\D\((\w+)\)$','switchWwn:\s(.*)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)','').Trim()
@@ -129,37 +149,34 @@ $FOS_InfoCount = $FOS_advInfo.count
     }
 }
 
-#$FOS_perrsh_temp = Get-Content -Path ".\porteersh.txt" |Select-Object -Skip 2
-$FOS_usedPortsfiltered =@()
-$FOS_PortErrRegex = ':\s+(\d+.\d\w)\s+(\d+.\d\w)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)'
 foreach ($FOS_port in $FOS_perrsh_temp){
     #create a var and pipe some objects in
     $FOS_PortErr = "" | Select-Object Port,frames_tx,frames_rx,enc_in,crc_err,crc_g_eof,too_shrt,too_long,bad_eof,enc_out,disc_c3,link_fail,loss_sync,loss_sig,f_rejected,f_busied,c3timeout_tx,c3timeout_rx,psc_err,uncor_err
     #select the ports
     [Int16]$FOS_PortErr.Port = (($FOS_port |Select-String -Pattern '(\d+:)' -AllMatches).Matches.Value).Trim(':')
-    #[int]$FOS_PortErr.disc_c3 = $FOS_port.Substring(69,6).Trim()
+    
     #check if the port is "active", if it is fill the objects
     foreach($FOS_usedPortstemp in $FOS_usedPorts){
         if($FOS_PortErr.Port -eq $FOS_usedPortstemp){
-        $FOS_PortErr.frames_tx = ($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[1]
-        $FOS_PortErr.frames_rx = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[2])
-        $FOS_PortErr.enc_in = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[3])
-        $FOS_PortErr.crc_err = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[4])
-        $FOS_PortErr.crc_g_eof = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[5])
-        $FOS_PortErr.too_shrt = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[6])
-        $FOS_PortErr.too_long = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[7])
-        $FOS_PortErr.bad_eof = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[8])
-        $FOS_PortErr.enc_out = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[9])
-        $FOS_PortErr.disc_c3 = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[10])
-        $FOS_PortErr.link_fail = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[11])
-        $FOS_PortErr.loss_sync = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[12])
-        $FOS_PortErr.loss_sig = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[13])
-        $FOS_PortErr.f_rejected = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[14])
-        $FOS_PortErr.f_busied = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[15])
-        $FOS_PortErr.c3timeout_tx = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[16])
-        $FOS_PortErr.c3timeout_rx = (($FOS_port |Select-String -Pattern $FOS_PortErrRegex -AllMatches).Matches.Groups.Value[17])
-        $FOS_PortErr.psc_err = (($FOS_port |Select-String -Pattern '\s+(.{6})\s+\d+$' -AllMatches).Matches.Groups.Value[1]).Trim()
-        $FOS_PortErr.uncor_err = (($FOS_port |Select-String -Pattern '(\d+)$' -AllMatches).Matches.Groups.Value[1])
+        $FOS_PortErr.frames_tx = ($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[1]
+        $FOS_PortErr.frames_rx = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[2])
+        $FOS_PortErr.enc_in = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[3])
+        $FOS_PortErr.crc_err = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[4])
+        $FOS_PortErr.crc_g_eof = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[5])
+        $FOS_PortErr.too_shrt = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[6])
+        $FOS_PortErr.too_long = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[7])
+        $FOS_PortErr.bad_eof = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[8])
+        $FOS_PortErr.enc_out = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[9])
+        $FOS_PortErr.disc_c3 = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[10])
+        $FOS_PortErr.link_fail = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[11])
+        $FOS_PortErr.loss_sync = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[12])
+        $FOS_PortErr.loss_sig = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[13])
+        $FOS_PortErr.f_rejected = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[14])
+        $FOS_PortErr.f_busied = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[15])
+        $FOS_PortErr.c3timeout_tx = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[16])
+        $FOS_PortErr.c3timeout_rx = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[17])
+        $FOS_PortErr.psc_err = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[18])
+        $FOS_PortErr.uncor_err = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[19])
         $FOS_usedPortsfiltered += $FOS_PortErr
         }
     }
@@ -175,16 +192,10 @@ $FOS_InfoCount = $FOS_advInfo.count
     if($FOS_advInfo[$_] -match 'Buffers$'){
         $FOS_pbs_temp = $FOS_advInfo |Select-Object -Skip $_
         $FOS_Temp_var = $FOS_pbs_temp |Select-Object -Skip 2
-        #break
+       
     }
 }
 
-# $test = ssh admin@192.168.249.81 "portbuffershow" 
-#$FOS_Temp_var = $FOS_pbs_temp |Select-Object -Skip 3
-#$FOS_pbs_temp = plink insight@192.168.107.40 -pw Insight0Mon -batch "portbuffershow" 
-#$FOS_pbs_temp = Get-Content -Path ".\pbs_l.txt"
-#$FOS_Temp_var = $FOS_pbs_temp |Select-Object -Skip 3
-$FOS_pbs =@()
 foreach ($FOS_thisLine in $FOS_Temp_var) {
     #create a var and pipe some objects in and fill them with some data
     $FOS_PortBuff = "" | Select-Object Port,Type,Mode,Max_Resv,Tx,Rx,Usage,Buffers,Distance,Buffer
@@ -266,13 +277,13 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
         }
     }
  <#   
-    Tab -Name "Info of Switch Name 2" {
+    Tab -Name "Placeholder" {
 
     }
-    Tab -Name "Info of Switch Name 3" {
+    Tab -Name "Placeholder" {
 
     }
-    Tab -Name "Info of Switch Name 4" {
+    Tab -Name "Placeholder" {
 
     }
  #>   
@@ -280,7 +291,6 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
 
 #endregion
 
-
 #region CleanUp
-#Clear-Variable FOS* -Scope Global;
+Clear-Variable FOS* -Scope Global;
 #endregion

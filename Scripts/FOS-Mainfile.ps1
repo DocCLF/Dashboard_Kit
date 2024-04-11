@@ -37,7 +37,7 @@ if($Credantails.Protocol -eq 'plink'){
     $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
 }
 #>
-$FOS_advInfo = Get-Content -Path ".\swSmal_col.txt"
+$FOS_advInfo = Get-Content -Path ".\ip_vers.txt"
 <#----------------------- DataCollect ------------------#>
 #endregion
 
@@ -215,6 +215,25 @@ foreach ($FOS_thisLine in $FOS_Temp_var) {
 <#------------------- Portbuffershow -----------------------#>
 #endregion
 
+#region Zoning
+$FOS_ZoningInfo = Get-Content -Path ".\zone_det.txt" |Select-Object -Skip 7
+$FOS_ZoneOverview=@()
+foreach ($FOS_ZoneLine in $FOS_ZoningInfo){
+    $FOS_Zone = "" | Select-Object Name,WWPN,Alias
+    if($FOS_ZoneLine -eq (($FOS_ZoneLine |Select-String -Pattern '\s+([0-9a-f:]{23})\s+(\b\w+\b)$' -AllMatches).Matches.Value)){
+        $FOS_Zone.WWPN = ($FOS_ZoneLine |Select-String -Pattern '([0-9a-f:]{23})\s+(\b\w+\b)$' -AllMatches).Matches.Groups.Value[1]
+        $FOS_Zone.Alias = ($FOS_ZoneLine |Select-String -Pattern '([0-9a-f:]{23})\s+(\b\w+\b)$' -AllMatches).Matches.Groups.Value[2]
+        Write-Host $FOS_Zone.WWPN '->' $FOS_Zone.Alias -ForegroundColor Green
+    }else {
+        <# Action when all if and elseif conditions are false #>
+        $FOS_Zone.Name = (($FOS_ZoneLine |Select-String -Pattern '(\b\w+\b)$' -AllMatches).Matches.Value).Trim()
+        Write-Host $FOS_Zone.Name -ForegroundColor red
+    }
+    $FOS_ZoneOverview += $FOS_Zone
+}
+<#------------------- Zoning -----------------------#>
+#endregion
+
 
 #region HTML - Creation
 Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
@@ -270,16 +289,23 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
             Section -name "Port Error Show" -CanCollapse   {
                 Table -HideFooter -DataTable $FOS_usedPortsfiltered{
                     TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 200 -BackgroundColor LightGoldenrodYellow
-                    TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 5 -BackgroundColor LightGoldenrodYellow
-                    TableConditionalFormatting -Name 'loss_sig' -ComparisonType number -Operator gt -Value 5 -BackgroundColor LightGoldenrodYellow
+                    TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 400 -BackgroundColor OrangeRed
+                    TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 3 -BackgroundColor LightGoldenrodYellow
+                    TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 6 -BackgroundColor OrangeRed
+                    TableConditionalFormatting -Name 'loss_sig' -ComparisonType number -Operator gt -Value 1 -BackgroundColor LightGoldenrodYellow
                 }
             }
         }
     }
- <#   
-    Tab -Name "Placeholder" {
-
+  
+    Tab -Name "Zone Inforamtion" {
+        Section -Name "More Info 1" -Invisible {
+            Section -Name "Zone Information" {
+                Table -HideFooter -DisablePaging -DataTable $FOS_ZoneOverview
+            }
+        }
     }
+     <# 
     Tab -Name "Placeholder" {
 
     }
@@ -292,5 +318,5 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
 #endregion
 
 #region CleanUp
-Clear-Variable FOS* -Scope Global;
+#Clear-Variable FOS* -Scope Global;
 #endregion

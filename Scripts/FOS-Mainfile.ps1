@@ -37,7 +37,7 @@ if($Credantails.Protocol -eq 'plink'){
     $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
 }
 #>
-$FOS_advInfo = Get-Content -Path ".\ip_vers.txt"
+$FOS_advInfo = Get-Content -Path ".\swSmal_col.txt"
 <#----------------------- DataCollect ------------------#>
 #endregion
 
@@ -216,7 +216,8 @@ foreach ($FOS_thisLine in $FOS_Temp_var) {
 #endregion
 
 #region Zoning
-$FOS_ZoningInfo = Get-Content -Path ".\zone_det.txt" |Select-Object -Skip 7
+#$FOS_ZoningInfo = Get-Content -Path ".\zone_det.txt" |Select-Object -Skip 6
+$FOS_ZoningInfo = FOS_Zone_Details -UserName $Credantails.FOS_UserName $Credantails.FOS_DeviceIPADDR
 $FOS_ZoneOverview=@()
 foreach ($FOS_ZoneLine in $FOS_ZoningInfo){
     $FOS_Zone = "" | Select-Object Name,WWPN,Alias

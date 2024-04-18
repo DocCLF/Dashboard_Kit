@@ -52,8 +52,8 @@ function FOS_Zone_Details {
              }
             Default {
 
-                #$FOS_BasicZoneList = Get-Content -Path ".\zshow.txt"
-                $FOS_BasicZoneList = ssh $UserName@$($SwitchIP) "zoneshow"
+                #$FOS_BasicZoneList = Get-Content -Path ".\Schl_Fab2.txt"
+                #$FOS_BasicZoneList = ssh $UserName@$($SwitchIP) "zoneshow"
                 $FOS_ZoneCount = $FOS_BasicZoneList.count
 
                 0..$FOS_ZoneCount |ForEach-Object {

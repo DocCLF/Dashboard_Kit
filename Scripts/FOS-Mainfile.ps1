@@ -319,5 +319,5 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
 #endregion
 
 #region CleanUp
-#Clear-Variable FOS* -Scope Global;
+Clear-Variable FOS* -Scope Global;
 #endregion

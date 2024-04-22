@@ -1,5 +1,6 @@
 using namespace System.Net
-function Device_Credantials {
+
+function GET_DeviceCredantials {
     $UserCredantials=@()
     <#Number of switches that Var will later use as IDs.#>
     [Int16]$SWnumber = Read-Host "How many Switches"

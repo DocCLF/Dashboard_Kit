@@ -1,7 +1,7 @@
 
 # there a lot of "errors" in combination with substring Parameter, thats why "silentlycontinue"
 $ErrorActionPreference="SilentlyContinue"
-$DebugPreference="Continue"
+$DebugPreference="SilentlyContinue"
 
 #$Credantails = Device_Credantials
 
@@ -14,14 +14,14 @@ $Credantails.IPAddress |ForEach-Object {Write-Host "test $_"}
 <#--------- Hashtable for BasicSwitch Info ------------#>
 $FOS_SwGeneralInfos =[ordered]@{}
 <#----- Hashtable Unique information of the switch ----#>
-$FOS_SwBasicInfos =[ordered]@{}
+#$FOS_SwBasicInfos =[ordered]@{}
 <#----- Array Unique information of the switchports ----#>
 $FOS_SwBasicPortDetails=@()
 $FOS_usedPorts =@()
 <#----- Array Unique information of the switch used at Porterrshow ----#>
-$FOS_usedPortsfiltered =@()
+#$FOS_usedPortsfiltered =@()
 <#----- Array Unique information of the switch used at portbuffershow ----#>
-$FOS_pbs =@()
+#$FOS_pbs =@()
 #endregion
 
 
@@ -122,129 +122,40 @@ foreach($FOS_linebyLine in $FOS_advInfo){
 #region LogicalSwitch
 <#----------- LogicalSwitch/ FID Infos -----------#>
 <#----------- Unique information of the switch -----------#>
-
-$FOS_LoSw_CFG = (($FOS_advInfo | Select-String -Pattern 'FID:\s(\d+)$','SwitchType:\s(\w+)$','DomainID:\s(\d+)$','SwitchName:\s(.*)$','FabricName:\s(\w+)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)',''
-
-$FOS_LoSwAdd_CFG = ((($FOS_advInfo | Select-String -Pattern '\D\((\w+)\)$','switchWwn:\s(.*)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)','').Trim()
-
-$FOS_SwBasicInfos.Add('Swicht Name',$FOS_LoSw_CFG[3])
-$FOS_SwBasicInfos.Add('Active ZonenCFG',$FOS_LoSwAdd_CFG[1].Trim('( )'))
-$FOS_SwBasicInfos.Add('FabricName',$FOS_LoSw_CFG[4])
-$FOS_SwBasicInfos.Add('DomainID',$FOS_LoSw_CFG[2])
-$FOS_SwBasicInfos.Add('SwitchType',$FOS_LoSw_CFG[1])
-$FOS_SwBasicInfos.Add('Switch WWN',$FOS_LoSwAdd_CFG[0])
-$FOS_SwBasicInfos.Add('Fabric ID:',$FOS_LoSw_CFG[0])
+$FOS_UniqueSwitchInfo = GET_UniqueSwitchInfos -FOS_MainInformation $FOS_advInfo
 <#----------- Logical Switch/ FID Infos -----------#>
 #endregion
 
 #region Porterrshow
-
-$FOS_InfoCount = $FOS_advInfo.count
-0..$FOS_InfoCount |ForEach-Object {
-    # Pull only the effective ZoneCFG back into ZoneList
-    if($FOS_advInfo[$_] -match '^\s+frames'){
-        $FOS_advInfoTemp = $FOS_advInfo |Select-Object -Skip $_
-        $FOS_perrsh_temp = $FOS_advInfoTemp |Select-Object -Skip 2
-        #break
-    }
-}
-
-foreach ($FOS_port in $FOS_perrsh_temp){
-    #create a var and pipe some objects in
-    $FOS_PortErr = "" | Select-Object Port,frames_tx,frames_rx,enc_in,crc_err,crc_g_eof,too_shrt,too_long,bad_eof,enc_out,disc_c3,link_fail,loss_sync,loss_sig,f_rejected,f_busied,c3timeout_tx,c3timeout_rx,psc_err,uncor_err
-    #select the ports
-    [Int16]$FOS_PortErr.Port = (($FOS_port |Select-String -Pattern '(\d+:)' -AllMatches).Matches.Value).Trim(':')
-    
-    #check if the port is "active", if it is fill the objects
-    foreach($FOS_usedPortstemp in $FOS_usedPorts){
-        if($FOS_PortErr.Port -eq $FOS_usedPortstemp){
-        $FOS_PortErr.frames_tx = ($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[1]
-        $FOS_PortErr.frames_rx = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[2])
-        $FOS_PortErr.enc_in = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[3])
-        $FOS_PortErr.crc_err = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[4])
-        $FOS_PortErr.crc_g_eof = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[5])
-        $FOS_PortErr.too_shrt = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[6])
-        $FOS_PortErr.too_long = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[7])
-        $FOS_PortErr.bad_eof = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[8])
-        $FOS_PortErr.enc_out = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[9])
-        $FOS_PortErr.disc_c3 = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[10])
-        $FOS_PortErr.link_fail = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[11])
-        $FOS_PortErr.loss_sync = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[12])
-        $FOS_PortErr.loss_sig = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[13])
-        $FOS_PortErr.f_rejected = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[14])
-        $FOS_PortErr.f_busied = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[15])
-        $FOS_PortErr.c3timeout_tx = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[16])
-        $FOS_PortErr.c3timeout_rx = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[17])
-        $FOS_PortErr.psc_err = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[18])
-        $FOS_PortErr.uncor_err = (($FOS_port |Select-String -Pattern '(\d+\.\d\w|\d+)' -AllMatches).Matches.Value[19])
-        $FOS_usedPortsfiltered += $FOS_PortErr
-        }
-    }
-}
+$FOS_PortErrShow = GET_PortErrShowInfos -FOS_MainInformation $FOS_advInfo -FOS_GetUsedPorts $FOS_usedPorts
 <#------------------- Porterrshow -----------------------#>
 #endregion
 
 #region Portbuffershow
-
-$FOS_InfoCount = $FOS_advInfo.count
-0..$FOS_InfoCount |ForEach-Object {
-    # Pull only the effective ZoneCFG back into ZoneList
-    if($FOS_advInfo[$_] -match 'Buffers$'){
-        $FOS_pbs_temp = $FOS_advInfo |Select-Object -Skip $_
-        $FOS_Temp_var = $FOS_pbs_temp |Select-Object -Skip 2
-       
-    }
-}
-
-foreach ($FOS_thisLine in $FOS_Temp_var) {
-    #create a var and pipe some objects in and fill them with some data
-    $FOS_PortBuff = "" | Select-Object Port,Type,Mode,Max_Resv,Tx,Rx,Usage,Buffers,Distance,Buffer
-    $FOS_PortBuff.Port = ($FOS_thisLine |Select-String -Pattern '^\s+(\d+)' -AllMatches).Matches.Groups.Value[1]
-    $FOS_PortBuff.Type = ($FOS_thisLine |Select-String -Pattern '([EFGLU])' -AllMatches).Matches.Groups.Value[1]
-    $FOS_PortBuff.LX_Mode = ($FOS_thisLine |Select-String -Pattern '(LE|LD|L0|LS)' -AllMatches).Matches.Groups.Value[1]
-    $FOS_PortBuff.Max_Resv = ($FOS_thisLine |Select-String -Pattern '(\d+)\s+(\d+\(|-\s\()' -AllMatches).Matches.Groups.Value[1]
-    $FOS_PortBuff.Tx = ($FOS_thisLine |Select-String -Pattern '(\d+\(\d+\)|\d\(\s\d+\)|-\s\(\s\d+\)|-\s\(\s+\d+\)|-\s\(\d+\)|-\s\(\s+-\s+\))' -AllMatches).Matches.Groups.Value[1]
-    $FOS_PortBuff.Rx = ($FOS_thisLine |Select-String -Pattern '(\d+\(\d+\)|\d\(\s\d+\)|-\s\(\s\d+\)|-\s\(\s+\d+\)|-\s\(\d+\)|-\s\(\s+-\s+\))' -AllMatches).Matches.Value[1]
-    $FOS_PortBuff.Usage = ($FOS_thisLine |Select-String -Pattern '\)\s+(\d+)\s+' -AllMatches).Matches.Groups.Value[1]
-    $FOS_PortBuff.Buffers = ($FOS_thisLine |Select-String -Pattern '\)\s+(\d+)\s+(\d+|-)' -AllMatches).Matches.Groups.Value[2]
-    $FOS_PortBuff.Distance = ($FOS_thisLine |Select-String -Pattern '\d\s+(\d+|-)\s+(\d+km|\<\d+km|-)' -AllMatches).Matches.Groups.Value[2]
-    $FOS_PortBuff.Buffer = ($FOS_thisLine |Select-String -Pattern '\s+(\d+)$' -AllMatches).Matches.Groups.Value[1]
-    $FOS_pbs += $FOS_PortBuff
-
-}
+$FOS_PortBuffershow = Get_PortbufferShowInfo -FOS_MainInformation $FOS_advInfo
 <#------------------- Portbuffershow -----------------------#>
 #endregion
 
 #region Zoning
-#$FOS_ZoningInfo = Get-Content -Path ".\zone_det.txt" |Select-Object -Skip 6
-$FOS_ZoningInfo = FOS_Zone_Details -UserName $Credantails.FOS_UserName $Credantails.FOS_DeviceIPADDR
-$FOS_ZoneOverview=@()
-foreach ($FOS_ZoneLine in $FOS_ZoningInfo){
-    $FOS_Zone = "" | Select-Object Name,WWPN,Alias
-    if($FOS_ZoneLine -eq (($FOS_ZoneLine |Select-String -Pattern '\s+([0-9a-f:]{23})\s+(\b\w+\b)$' -AllMatches).Matches.Value)){
-        $FOS_Zone.WWPN = ($FOS_ZoneLine |Select-String -Pattern '([0-9a-f:]{23})\s+(\b\w+\b)$' -AllMatches).Matches.Groups.Value[1]
-        $FOS_Zone.Alias = ($FOS_ZoneLine |Select-String -Pattern '([0-9a-f:]{23})\s+(\b\w+\b)$' -AllMatches).Matches.Groups.Value[2]
-        Write-Host $FOS_Zone.WWPN '->' $FOS_Zone.Alias -ForegroundColor Green
-    }else {
-        <# Action when all if and elseif conditions are false #>
-        $FOS_Zone.Name = (($FOS_ZoneLine |Select-String -Pattern '(\b\w+\b)$' -AllMatches).Matches.Value).Trim()
-        Write-Host $FOS_Zone.Name -ForegroundColor red
-    }
-    $FOS_ZoneOverview += $FOS_Zone
+if($FOS_SwBasicInfosold -ne $FOS_UniqueSwitchInfo[1]){
+    $FOS_ZoningInfo = GET_ZoneDetails |Select-Object -Skip 2
+    $FOS_SwBasicInfosold = $FOS_UniqueSwitchInfo[1]
+}else {
+    <# Action when all if and elseif conditions are false #>
+    Write-Host "$FOS_SwBasicInfosold is equal $($FOS_UniqueSwitchInfo[1])" -ForegroundColor Green
 }
 <#------------------- Zoning -----------------------#>
 #endregion
 
-
 #region HTML - Creation
 Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
-    Tab -Name "Info of $($FOS_SwBasicInfos[0])" {
+   Tab -Name "Info of $($FOS_UniqueSwitchInfo[0])" -IconSolid apple-alt -IconColor RedBerry {
         Section -Name "More Info 1" -Invisible {
             Section -Name "Basic Information" {
                 Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_SwGeneralInfos
             }
             Section -Name "FID Information" {
-                Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_SwBasicInfos
+                Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_UniqueSwitchInfo
             }
         }
         Section -Name "bluber" -Invisible{
@@ -272,7 +183,7 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
                 }
             }
             Section -Name "Port Buffer Show" -CanCollapse {
-                Table -HideFooter -DataTable $FOS_pbs {
+                Table -HideFooter -DataTable $FOS_PortBuffershow {
                     EmailTableHeader -Names 'Port' -Title 'User' 
                     EmailTableHeader -Names 'Type' -Title 'Port' 
                     EmailTableHeader -Names 'Mode' -Title 'Lx'
@@ -288,12 +199,12 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
         }
         Section -Name "Port Info" -Invisible{
             Section -name "Port Error Show" -CanCollapse   {
-                Table -HideFooter -DataTable $FOS_usedPortsfiltered{
-                    TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 200 -BackgroundColor LightGoldenrodYellow
-                    TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 400 -BackgroundColor OrangeRed
-                    TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 3 -BackgroundColor LightGoldenrodYellow
-                    TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 6 -BackgroundColor OrangeRed
-                    TableConditionalFormatting -Name 'loss_sig' -ComparisonType number -Operator gt -Value 1 -BackgroundColor LightGoldenrodYellow
+                Table -HideFooter -DataTable $FOS_PortErrShow{
+                    #TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 200 -BackgroundColor LightGoldenrodYellow
+                    #TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 400 -BackgroundColor OrangeRed
+                    #TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 3 -BackgroundColor LightGoldenrodYellow
+                    #TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 6 -BackgroundColor OrangeRed
+                    #TableConditionalFormatting -Name 'loss_sig' -ComparisonType number -Operator gt -Value 1 -BackgroundColor LightGoldenrodYellow
                 }
             }
         }
@@ -302,18 +213,28 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
     Tab -Name "Zone Inforamtion" {
         Section -Name "More Info 1" -Invisible {
             Section -Name "Zone Information" {
-                Table -HideFooter -DisablePaging -DataTable $FOS_ZoneOverview
+                Table -HideFooter -DisablePaging -DataTable $FOS_ZoningInfo
             }
         }
     }
-     <# 
+    
+    <#'Tab -Name "Placeholder" {
+        New-HTMLDiagram {
+            #New-DiagramOptionsPhysics -Enabled $true
+            New-DiagramOptionsInteraction -Hover $true
+            #New-DiagramOptionsLayout -RandomSeed 50
+            New-DiagramOptionsLayout -RandomSeed 500 -HierarchicalEnabled $true -HierarchicalDirection FromUpToDown
+            New-DiagramNode -Id $($FOS_ZoneOverview.WWPN[321]) -Label $($FOS_ZoneOverview.Alias[321]) -Level 1 -IconSolid server -IconColor Red
+            New-DiagramNode -Id $($FOS_ZoneOverview.WWPN[319]) -Label $($FOS_ZoneOverview.Alias[319]) -Level 2 -To $($FOS_ZoneOverview.WWPN[321]) -IconSolid database
+            New-DiagramNode -Id $($FOS_ZoneOverview.WWPN[320]) -Label $($FOS_ZoneOverview.Alias[320]) -Level 2 -To $($FOS_ZoneOverview.WWPN[321]) -IconSolid database
+            
+        }
+    }#>
+    <#
     Tab -Name "Placeholder" {
 
     }
-    Tab -Name "Placeholder" {
-
-    }
- #>   
+  #>
 } -Show
 
 #endregion

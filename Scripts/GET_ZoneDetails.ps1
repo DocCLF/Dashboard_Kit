@@ -1,7 +1,6 @@
 using namespace System.Net
-$DebugPreference="Continue"
 
-function FOS_Zone_Details {
+function GET_ZoneDetails {
         <#
         .SYNOPSIS
         Displays zone information.
@@ -23,7 +22,7 @@ function FOS_Zone_Details {
         Brocade® Fabric OS® Command Reference Manual, 9.2.x
         https://techdocs.broadcom.com/us/en/fibre-channel-networking/fabric-os/fabric-os-commands/9-2-x/Fabric-OS-Commands.html
         #>
-    param (
+   <# param (
         [Parameter(Mandatory,ValueFromPipeline)]
         [string]$UserName,
         [Parameter(Mandatory,ValueFromPipeline)]
@@ -31,7 +30,7 @@ function FOS_Zone_Details {
         [Parameter(ValueFromPipeline)]
         [ValidateSet("peerzone")]
         [string]$FOS_Operand
-    )
+    )#>
     begin{
         Write-Debug -Message "Begin block |$(Get-Date)"
         # create some var
@@ -52,7 +51,7 @@ function FOS_Zone_Details {
              }
             Default {
 
-                #$FOS_BasicZoneList = Get-Content -Path ".\Schl_Fab2.txt"
+                $FOS_BasicZoneList = Get-Content -Path ".\Schl_Fab2.txt"
                 #$FOS_BasicZoneList = ssh $UserName@$($SwitchIP) "zoneshow"
                 $FOS_ZoneCount = $FOS_BasicZoneList.count
 
@@ -117,7 +116,7 @@ function FOS_Zone_Details {
             }
 
             Write-Host "Here is the list of zones with WWPNs and their corresponding aliases:" -ForegroundColor Green
-            $FOS_ZoneCollection
+            return $FOS_ZoneCollection
 
             Write-Debug -Message "$FOS_ZoneCollection `nEnd of Process block |$(Get-Date)"
 
@@ -130,7 +129,7 @@ function FOS_Zone_Details {
     }
     end{
         # clear the most of the used vars
-        Clear-Variable FOS_* -Scope Global;
+        #Clear-Variable FOS_* -Scope Global;
         Write-Debug -Message "End block |$(Get-Date)"
     }
 }

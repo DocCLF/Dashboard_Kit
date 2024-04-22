@@ -21,28 +21,32 @@ function GET_UniqueSwitchInfos {
     #>
     param (
         [Parameter(Mandatory)]
-        [string]$FOS_MainInformation
+        [System.Object]$FOS_MainInformation
     )
-    Write-Debug -Message "Start Func GET_UniqueSwitchInfos |$(Get-Date)` "
-    <# Create an ordered hashtable #>
-    $FOS_SwBasicInfos =[ordered]@{}
+    begin{
+        Write-Debug -Message "Start Func GET_UniqueSwitchInfos |$(Get-Date)` "
+        <# Create an ordered hashtable #>
+        $FOS_SwBasicInfos =[ordered]@{}
+    }
+    process{
+        <# collect the information with the help of regex pattern and remove the blanks with the help of replace and trim #>
+        $FOS_LoSw_CFG = (($FOS_MainInformation | Select-String -Pattern 'FID:\s(\d+)$','SwitchType:\s(\w+)$','DomainID:\s(\d+)$','SwitchName:\s(.*)$','FabricName:\s(\w+)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)',''
 
-    <# collect the information with the help of regex pattern and remove the blanks with the help of replace and trim #>
-    $FOS_LoSw_CFG = (($FOS_MainInformation | Select-String -Pattern 'FID:\s(\d+)$','SwitchType:\s(\w+)$','DomainID:\s(\d+)$','SwitchName:\s(.*)$','FabricName:\s(\w+)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)',''
+        $FOS_LoSwAdd_CFG = ((($FOS_MainInformation | Select-String -Pattern '\D\((\w+)\)$','switchWwn:\s(.*)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)','').Trim()
 
-    $FOS_LoSwAdd_CFG = ((($FOS_MainInformation | Select-String -Pattern '\D\((\w+)\)$','switchWwn:\s(.*)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)','').Trim()
-
-    <# add the values to the hashtable #>
-    $FOS_SwBasicInfos.Add('Swicht Name',$FOS_LoSw_CFG[3])
-    $FOS_SwBasicInfos.Add('Active ZonenCFG',$FOS_LoSwAdd_CFG[1].Trim('( )'))
-    $FOS_SwBasicInfos.Add('FabricName',$FOS_LoSw_CFG[4])
-    $FOS_SwBasicInfos.Add('DomainID',$FOS_LoSw_CFG[2])
-    $FOS_SwBasicInfos.Add('SwitchType',$FOS_LoSw_CFG[1])
-    $FOS_SwBasicInfos.Add('Switch WWN',$FOS_LoSwAdd_CFG[0])
-    $FOS_SwBasicInfos.Add('Fabric ID:',$FOS_LoSw_CFG[0])
-
-    <# returns the hashtable for further processing, not mandatory but the safe way #>
-    return $FOS_SwBasicInfos
-    Write-Debug -Message "return $FOS_SwBasicInfos ` $(Get-Date)` "
-    Write-Debug -Message "End Func GET_UniqueSwitchInfos |$(Get-Date)` "
+        <# add the values to the hashtable #>
+        $FOS_SwBasicInfos.Add('Swicht Name',$FOS_LoSw_CFG[3])
+        $FOS_SwBasicInfos.Add('Active ZonenCFG',$FOS_LoSwAdd_CFG[1].Trim('( )'))
+        $FOS_SwBasicInfos.Add('FabricName',$FOS_LoSw_CFG[4])
+        $FOS_SwBasicInfos.Add('DomainID',$FOS_LoSw_CFG[2])
+        $FOS_SwBasicInfos.Add('SwitchType',$FOS_LoSw_CFG[1])
+        $FOS_SwBasicInfos.Add('Switch WWN',$FOS_LoSwAdd_CFG[0])
+        $FOS_SwBasicInfos.Add('Fabric ID:',$FOS_LoSw_CFG[0])
+    }
+    end{
+        <# returns the hashtable for further processing, not mandatory but the safe way #>
+        return $FOS_SwBasicInfos
+        Write-Debug -Message "return $FOS_SwBasicInfos ` $(Get-Date)` "
+        Write-Debug -Message "End Func GET_UniqueSwitchInfos |$(Get-Date)` "
+    }
 }

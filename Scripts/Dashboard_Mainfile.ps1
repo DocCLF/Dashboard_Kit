@@ -12,14 +12,13 @@ $Credantails.IPAddress |ForEach-Object {Write-Host "test $_"}
 #>
 #region Hashtables
 <#--------- Hashtable for BasicSwitch Info ------------#>
-$FOS_SwGeneralInfos =[ordered]@{}
+#$FOS_SwGeneralInfos =[ordered]@{}
 <#----- Hashtable Unique information of the switch ----#>
 #$FOS_SwBasicInfos =[ordered]@{}
 <#----- Array Unique information of the switchports ----#>
-$FOS_SwBasicPortDetails=@()
-$FOS_usedPorts =@()
-<#----- Array Unique information of the switch used at Porterrshow ----#>
-#$FOS_usedPortsfiltered =@()
+#$FOS_SwBasicPortDetails=@()
+#$FOS_usedPorts =@()
+
 <#----- Array Unique information of the switch used at portbuffershow ----#>
 #$FOS_pbs =@()
 #endregion
@@ -42,82 +41,15 @@ $FOS_advInfo = Get-Content -Path ".\swSmal_col.txt"
 #endregion
 
 
-#region Switchshow
-
-# Collect all needed Infos
-$FOS_FW_Info = ($FOS_advInfo | Select-String -Pattern '([v?][\d]\.[\d+]\.[\d]\w)$' -AllMatches).Matches.Value |Select-Object -Unique
-$FOS_IP_AddrCFG = ($FOS_advInfo | Select-String -Pattern '(?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})').Matches.Value |Select-Object -Unique
-$FOS_DHCP_CFG = (($FOS_advInfo | Select-String -Pattern '^DHCP:\s(\w+)$' -AllMatches).Matches.Value |Select-Object -Unique).Trim('DHCP: ')
-$FOS_temp = ($FOS_advInfo | Select-String -Pattern 'switchType:\s(.*)$','switchState:\s(.*)$','switchRole:\s(.*)$' |ForEach-Object {$_.Matches.Groups[1].Value}).Trim()
-
-<# Make the product type understandable for people. ;) #>
-if($FOS_temp[2] -like "1*"){
-    # with VF jump in here
-    switch ($FOS_temp[2]) {
-        {$_ -like "170*"}  { $FOS_SwHw = "Brocade G610" }
-        {$_ -like "162*"}  { $FOS_SwHw = "Brocade G620" }
-        {$_ -like "183*"}  { $FOS_SwHw = "Brocade G620" }
-        {$_ -like "173*"}  { $FOS_SwHw = "Brocade G630" }
-        {$_ -like "184*"}  { $FOS_SwHw = "Brocade G630" }
-        {$_ -like "178*"}  { $FOS_SwHw = "Brocade 7810 Extension Switch" }
-        {$_ -like "181*"}  { $FOS_SwHw = "Brocade G720" }
-        {$_ -like "189*"}  { $FOS_SwHw = "Brocade G730" }
-        Default {$FOS_SwHw = "Unknown Type"}
-    }
-    $FOS_StateTemp =$FOS_temp[3]
-    $FOS_RoleTemp =$FOS_temp[4]
-}else {
-    # else jump in here
-    switch ($FOS_temp[1]) {
-        {$_ -like "170*"}  { $FOS_SwHw = "Brocade G610" }
-        {$_ -like "162*"}  { $FOS_SwHw = "Brocade G620" }
-        {$_ -like "183*"}  { $FOS_SwHw = "Brocade G620" }
-        {$_ -like "173*"}  { $FOS_SwHw = "Brocade G630" }
-        {$_ -like "184*"}  { $FOS_SwHw = "Brocade G630" }
-        {$_ -like "178*"}  { $FOS_SwHw = "Brocade 7810 Extension Switch" }
-        {$_ -like "181*"}  { $FOS_SwHw = "Brocade G720" }
-        {$_ -like "189*"}  { $FOS_SwHw = "Brocade G730" }
-        Default {$FOS_SwHw = "Unknown Type"}
-    }
-    $FOS_StateTemp =$FOS_temp[2]
-    $FOS_RoleTemp =$FOS_temp[3]
-}
-
-
-foreach($FOS_linebyLine in $FOS_advInfo){
-        <# Only collect data up to the next section, marked by frames #>
-        if($FOS_linebyLine -match '^\s+frames'){break}
-
-        # add more Basic Infos of the switch to the Hashtable
-        $FOS_SwGeneralInfos.Add('Brocade Product Name',$FOS_SwHw)
-        $FOS_SwGeneralInfos.Add('FOS Version',$FOS_FW_Info)
-        $FOS_SwGeneralInfos.Add('Ethernet IP Address',$FOS_IP_AddrCFG[0])
-        $FOS_SwGeneralInfos.Add('Ethernet Subnet mask',$FOS_IP_AddrCFG[1])
-        $FOS_SwGeneralInfos.Add('Gateway IP Address',$FOS_IP_AddrCFG[2])
-        $FOS_SwGeneralInfos.Add('DHCP',$FOS_DHCP_CFG)
-        $FOS_SwGeneralInfos.Add('Switch State',$FOS_StateTemp)
-        $FOS_SwGeneralInfos.Add('Switch Role',$FOS_RoleTemp)
-        
-        
-        # Build the Portsection of switchshow
-        if($FOS_linebyLine -match '^\s+\d+'){
-            $FOS_SWsh = "" | Select-Object Index,Port,Address,Media,Speed,State,Proto,PortConnect
-            $FOS_SWsh.Index = $FOS_linebyLine.Substring(0,4).Trim()
-            $FOS_SWsh.Port = $FOS_linebyLine.Substring(5,5).Trim()
-            $FOS_SWsh.Address = $FOS_linebyLine.Substring(10,8).Trim()
-            $FOS_SWsh.Media = $FOS_linebyLine.Substring(20,4).Trim()
-            $FOS_SWsh.Speed = $FOS_linebyLine.Substring(25,5).Trim()
-            $FOS_SWsh.State = $FOS_linebyLine.Substring(34,10).Trim()
-            $FOS_SWsh.Proto = $FOS_linebyLine.Substring(45,4).Trim()
-            $FOS_SWsh.PortConnect = $FOS_linebyLine.Substring(50).Trim()
-            $FOS_SwBasicPortDetails += $FOS_SWsh
-        }
-        # if the Portnumber is not empty and there is a SFP pluged in, push the Port in the FOS_usedPorts array
-        if(($FOS_SWsh.Port -ne "") -and ($FOS_SWsh.Media -eq "id")){$FOS_usedPorts += $FOS_SWsh.Port}
-}
-<#----------------------- Switchshow ------------------#>
+#region BasisInfosSwitch
+$FOS_BasicSwitchInfo = GET_BasicSwitchInfos -FOS_MainInformation $FOS_advInfo
+<#------------------- BasisInfosSwitch -----------------------#>
 #endregion
 
+#region Switchshow
+$FOS_SwitchShowInfo, $FOS_SwitchusedPorts = GET_SwitchShowInfo -FOS_MainInformation $FOS_advInfo
+<#------------------- Switchshow -----------------------#>
+#endregion
 
 #region LogicalSwitch
 <#----------- LogicalSwitch/ FID Infos -----------#>
@@ -127,7 +59,7 @@ $FOS_UniqueSwitchInfo = GET_UniqueSwitchInfos -FOS_MainInformation $FOS_advInfo
 #endregion
 
 #region Porterrshow
-$FOS_PortErrShow = GET_PortErrShowInfos -FOS_MainInformation $FOS_advInfo -FOS_GetUsedPorts $FOS_usedPorts
+$FOS_PortErrShow = GET_PortErrShowInfos -FOS_MainInformation $FOS_advInfo -FOS_GetUsedPorts $FOS_SwitchusedPorts
 <#------------------- Porterrshow -----------------------#>
 #endregion
 
@@ -152,7 +84,7 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
    Tab -Name "Info of $($FOS_UniqueSwitchInfo[0])" -IconSolid apple-alt -IconColor RedBerry {
         Section -Name "More Info 1" -Invisible {
             Section -Name "Basic Information" {
-                Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_SwGeneralInfos
+                Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_BasicSwitchInfo
             }
             Section -Name "FID Information" {
                 Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_UniqueSwitchInfo
@@ -161,23 +93,23 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
         Section -Name "bluber" -Invisible{
             Section -Name "Basic Port Information" {
                 New-HTMLChart{
-                    New-ChartPie -Name "Available Ports" -Value $($FOS_SwBasicPortDetails.Count) -Color Green
-                    New-ChartPie -Name "Used Ports" -Value $($FOS_usedPorts.count) -Color Red
+                    New-ChartPie -Name "Available Ports" -Value $($FOS_SwitchShowInfo.Count) -Color Green
+                    New-ChartPie -Name "Used Ports" -Value $($FOS_SwitchusedPorts.count) -Color Red
                 }
             }
             Section -Name "Used Port Speed Allocation" {
                 New-HTMLChart{
-                    New-ChartPie -Name "64G" -Value $(($FOS_SwBasicPortDetails |Where-Object {$_.Speed -eq "N64"}).count)
-                    New-ChartPie -Name "32G" -Value $(($FOS_SwBasicPortDetails |Where-Object {$_.Speed -eq "N32"}).count)
-                    New-ChartPie -Name "16G" -Value $(($FOS_SwBasicPortDetails |Where-Object {$_.Speed -eq "N16"}).count)
-                    New-ChartPie -Name "8G" -Value $(($FOS_SwBasicPortDetails |Where-Object {$_.Speed -eq "N8"}).count)
-                    New-ChartPie -Name "4G" -Value $(($FOS_SwBasicPortDetails |Where-Object {$_.Speed -eq "N4"}).count)
+                    New-ChartPie -Name "64G" -Value $(($FOS_SwitchShowInfo |Where-Object {$_.Speed -eq "N64"}).count)
+                    New-ChartPie -Name "32G" -Value $(($FOS_SwitchShowInfo |Where-Object {$_.Speed -eq "N32"}).count)
+                    New-ChartPie -Name "16G" -Value $(($FOS_SwitchShowInfo |Where-Object {$_.Speed -eq "N16"}).count)
+                    New-ChartPie -Name "8G" -Value $(($FOS_SwitchShowInfo |Where-Object {$_.Speed -eq "N8"}).count)
+                    New-ChartPie -Name "4G" -Value $(($FOS_SwitchShowInfo |Where-Object {$_.Speed -eq "N4"}).count)
                 }
             }
         }
         Section -Name "Port Info" -Invisible{
             Section -Name "Port Basic Show" -CanCollapse {
-                Table -HideFooter -DataTable $FOS_SwBasicPortDetails{
+                Table -HideFooter -DataTable $FOS_SwitchShowInfo{
                     TableConditionalFormatting -Name 'State' -ComparisonType string -Operator eq -Value 'Online' -BackgroundColor LightGreen -Row
                     TableConditionalFormatting -Name 'State' -ComparisonType string -Operator eq -Value 'No_Module' -BackgroundColor LightGray -Row
                 }
@@ -240,5 +172,5 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
 #endregion
 
 #region CleanUp
-Clear-Variable FOS* -Scope Global;
+#Clear-Variable FOS* -Scope Global;
 #endregion

@@ -8,8 +8,9 @@ function GET_DeviceCredantials {
     <#For IPAddr Check#>
     $IPPattern = '^(?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$'
     if($SWnumber -ge 1){
-        Write-Host $SWnumber
+        
         for ($Device =1; $Device -le $SWnumber;$Device++){
+            Write-Host "Please enter Credantials for Device number: $Device "
             $CredantialsCollect=[ordered]@{}
             Write-Host "Please Enter IP: " -ForegroundColor Yellow -NoNewline
                 <#Input Loop Until Validation meets pattern#>
@@ -17,6 +18,8 @@ function GET_DeviceCredantials {
                     <# Set IP address var #>
                     $IPADR = Read-Host
                     <# Check that the input matches the specification. #>
+                    $FOS_OnorOff=Test-Connection $IPADR -Count 1
+                    Write-Debug -Message "Test-Connection to $IPADR was $($FOS_OnorOff.Status) ` "
                     $ok = $IPADR -match $IPPattern
                     if ($ok -eq $false) {
                     <# Error Message and Prompt to enter an IP #>
@@ -27,8 +30,11 @@ function GET_DeviceCredantials {
                 } until ( $ok )
 
             <#Test the Conection to the device works but need more inprovement #>
-            #$OnorOff=Test-Connection $IPADR -Count 1
-            #if($OnorOff.Status -eq "TimedOut"){Write-Host "exit"; continue}
+            #$FOS_OnorOff=Test-Connection $IPADR -Count 1
+            if($FOS_OnorOff.Status -ne "Success"){Write-Host "Your entered IP: $IPADR is not reachable, please check the connection and try again." -ForegroundColor Red; exit}
+            $CredantialsCollect.Add('ID',$Device)
+            $CredantialsCollect.Add('IPAddress',$IPADR)
+           
 
             [string]$Protocol=Read-Host "
             1 - ssh
@@ -38,16 +44,16 @@ function GET_DeviceCredantials {
                 1 { $Protocol="ssh" }
                 2 { $Protocol="plink" }
             }
-            [string]$UserName = Read-Host "enter the UserName of the device"
-            if($Protocol -eq "plink"){
-                $UserPassword = Read-Host "enter the Password of the device" -AsSecureString
-            }
-
-            $CredantialsCollect.Add('ID',$Device)
             $CredantialsCollect.Add('Protocol',$Protocol)
-            $CredantialsCollect.Add('IPAddress',$IPADR)
-            $CredantialsCollect.Add('UserName',$UserName)
+            [string]$UserName = Read-Host "enter the UserName of the device"
+            $CredantialsCollect.Add('UserName',$UserName) 
 
+            if($Protocol -eq "plink"){
+                $UserPassword = Read-Host "enter the Password of the device"
+                $UserPassword = ConvertTo-SecureString -String $UserPassword -AsPlainText
+                $CredantialsCollect.Add('Password',$UserPassword)
+            }
+            
             <# Maybe for later use as a Export Obj #>
             $CredantialObj=New-Object -TypeName psobject -Property $CredantialsCollect
             #$ExportCredantials = $CredantialObj | Select-Object ID,UserName,IPAddress,Protocol | Export-Csv -Path ".\ExportCredantials.csv" -NoTypeInformation

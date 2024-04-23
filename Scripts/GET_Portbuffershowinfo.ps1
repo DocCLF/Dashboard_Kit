@@ -1,7 +1,7 @@
 
 
 
-function Get_PortbufferShowInfo {
+function GET_PortbufferShowInfo {
     <#
     .SYNOPSIS
     Displays the buffer usage information for a port group or for all port groups in the switch.

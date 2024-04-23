@@ -27,6 +27,8 @@ function GET_SwitchShowInfo {
 
         <#----- Array for information of the switchports ----#>
         $FOS_SwBasicPortDetails=@()
+        <#----- Array for information of the used switchports ----#>
+        $FOS_usedPorts =@()
         
     }
     
@@ -60,6 +62,9 @@ function GET_SwitchShowInfo {
                 $FOS_SWsh.PortConnect = $FOS_linebyLine.Substring(50).Trim()
                 $FOS_SwBasicPortDetails += $FOS_SWsh
             }
+
+            # if the Portnumber is not empty and there is a SFP pluged in, push the Port in the FOS_usedPorts array
+            if(($FOS_SWsh.Port -ne "") -and ($FOS_SWsh.Media -eq "id")){$FOS_usedPorts += $FOS_SWsh.Port}
         }
 
     }
@@ -67,9 +72,12 @@ function GET_SwitchShowInfo {
     end {
 
         <# returns the hashtable for further processing, not mandatory but the safe way #>
-        return $FOS_SwBasicPortDetails
-        Write-Debug -Message "return $FOS_SwBasicPortDetails ` $(Get-Date)` "
         Write-Debug -Message "End Func GET_SwitchShowInfo |$(Get-Date)` "
+
+        Write-Debug -Message "$(Get-Date) return: ` $FOS_SwBasicPortDetails ` "
+        Write-Debug -Message "$(Get-Date) return: ` $FOS_usedPorts ` "
+        
+        return $FOS_SwBasicPortDetails, $FOS_usedPorts
         
     }
 }

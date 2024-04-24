@@ -22,19 +22,19 @@ function GET_PortErrShowInfos {
 
     param (
         [Parameter(Mandatory,ValueFromPipeline)]
-        [System.Object]$FOS_MainInformation,
+        $FOS_MainInformation,
         [Parameter(Mandatory,ValueFromPipeline)]
-        [int]$FOS_GetUsedPorts
+        $FOS_GetUsedPorts
     )
 
     begin{
         Write-Debug -Message "Begin GET_PortErrShowInfos |$(Get-Date)"
-        Write-Debug -Message " ` counted MainInformation $($FOS_MainInformation.count) - UsedPorts: $FOS_GetUsedPorts ` "
+        Write-Debug -Message "Counted MainInformation $($FOS_MainInformation.count) - UsedPorts: $($FOS_GetUsedPorts)"`
         <# Create a Array for the unique information of the switch used at Porterrshow #>
         $FOS_PortErrShowfiltered =@()
 
         $FOS_InfoCount = $FOS_MainInformation.count
-        Write-Debug -Message " ` $FOS_InfoCount ` "
+        Write-Debug -Message "Number of Lines: $FOS_InfoCount "
         0..$FOS_InfoCount |ForEach-Object {
             # Pull only the effective ZoneCFG back into ZoneList
             if($FOS_MainInformation[$_] -match '^\s+frames'){
@@ -101,10 +101,12 @@ function GET_PortErrShowInfos {
                 }
             }
         }
-        Write-Debug -Message " ` $FOS_PortErrShowfiltered ` "
+        
     }
     end{
-        Write-Debug -Message " `End GET_PortErrShowInfos |$(Get-Date) ` "
+        Write-Debug -Message "Start End-Block GET_PortErrShowInfos |$(Get-Date) ` "
+        Write-Debug -Message "Content of return: $FOS_PortErrShowfiltered "
         return $FOS_PortErrShowfiltered
+        
     }
 }

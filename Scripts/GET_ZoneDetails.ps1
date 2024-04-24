@@ -19,7 +19,10 @@ function GET_ZoneDetails  {
     Brocade® Fabric OS® Command Reference Manual, 9.2.x
     https://techdocs.broadcom.com/us/en/fibre-channel-networking/fabric-os/fabric-os-commands/9-2-x/Fabric-OS-Commands.html
     #>
+    [CmdletBinding()]
+    param (
 
+    )
     begin{
         Write-Debug -Message "Begin GET_ZoneDetails |$(Get-Date)"
 

@@ -4,6 +4,10 @@ $ErrorActionPreference="SilentlyContinue"
 $DebugPreference="SilentlyContinue"
 
 function Dashboard_MainFuncion {
+    [CmdletBinding()]
+    param (
+
+    )
     #$Credantails = Device_Credantials
 
     <#
@@ -75,7 +79,7 @@ function Dashboard_MainFuncion {
         $FOS_SwBasicInfosold = $FOS_UniqueSwitchInfo[1]
     }else {
         <# Action when all if and elseif conditions are false #>
-        Write-Host "$FOS_SwBasicInfosold is equal $($FOS_UniqueSwitchInfo[1])" -ForegroundColor Green
+        Write-Debug "$FOS_SwBasicInfosold is equal $($FOS_UniqueSwitchInfo[1])" -ForegroundColor Green
     }
     <#------------------- Zoning -----------------------#>
     #endregion
@@ -171,7 +175,10 @@ function Dashboard_MainFuncion {
     }
 }
 function Open_Brocade_Dashboard {
+    [CmdletBinding()]
+    param (
 
+    )
     Dashboard_MainFuncion
     Start-Sleep -Seconds 2
     Write-Host "Please Wait" -ForegroundColor Blue

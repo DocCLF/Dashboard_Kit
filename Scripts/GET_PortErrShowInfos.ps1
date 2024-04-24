@@ -19,7 +19,7 @@ function GET_PortErrShowInfos {
     Brocade® Fabric OS® Command Reference Manual, 9.2.x
     https://techdocs.broadcom.com/us/en/fibre-channel-networking/fabric-os/fabric-os-commands/9-2-x/Fabric-OS-Commands/portErrShow.html
     #>
-
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory,ValueFromPipeline)]
         $FOS_MainInformation,

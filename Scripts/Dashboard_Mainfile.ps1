@@ -3,6 +3,7 @@
 $ErrorActionPreference="SilentlyContinue"
 $DebugPreference="SilentlyContinue"
 
+
 #$Credantails = Device_Credantials
 
 <#
@@ -36,7 +37,7 @@ if($Credantails.Protocol -eq 'plink'){
     $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
 }
 #>
-$FOS_advInfo = Get-Content -Path ".\swSmal_col.txt"
+$FOS_advInfo = Get-Content -Path ".\sw2_col.txt"
 <#----------------------- DataCollect ------------------#>
 #endregion
 
@@ -132,11 +133,11 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
         Section -Name "Port Info" -Invisible{
             Section -name "Port Error Show" -CanCollapse   {
                 Table -HideFooter -DataTable $FOS_PortErrShow{
-                    #TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 200 -BackgroundColor LightGoldenrodYellow
-                    #TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 400 -BackgroundColor OrangeRed
-                    #TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 3 -BackgroundColor LightGoldenrodYellow
-                    #TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 6 -BackgroundColor OrangeRed
-                    #TableConditionalFormatting -Name 'loss_sig' -ComparisonType number -Operator gt -Value 1 -BackgroundColor LightGoldenrodYellow
+                    TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 200 -BackgroundColor LightGoldenrodYellow
+                    TableConditionalFormatting -Name 'disc_c3' -ComparisonType number -Operator gt -Value 400 -BackgroundColor OrangeRed
+                    TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 3 -BackgroundColor LightGoldenrodYellow
+                    TableConditionalFormatting -Name 'link_fail' -ComparisonType number -Operator gt -Value 6 -BackgroundColor OrangeRed
+                    TableConditionalFormatting -Name 'loss_sig' -ComparisonType number -Operator gt -Value 1 -BackgroundColor LightGoldenrodYellow
                 }
             }
         }
@@ -167,10 +168,23 @@ Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
 
     }
   #>
-} -Show
+} -ShowHTML
 
+function openhtml {
+
+    #Dashboard_MainFuncion
+    Start-Sleep -Seconds 2
+    Write-Host "Please Wait" -ForegroundColor Blue
+    Start-Sleep -Seconds 3
+    Invoke-Item -Path $Env:TEMP\Dashboard.html
+
+    return
+    
+}
+
+openhtml
 #endregion
 
 #region CleanUp
-#Clear-Variable FOS* -Scope Global;
+Clear-Variable FOS* -Scope Global;
 #endregion

@@ -3,7 +3,15 @@ using namespace System.Net
 function GET_DeviceCredantials {
     $UserCredantials=@()
     <#Number of switches that Var will later use as IDs.#>
-    [Int16]$SWnumber = Read-Host "How many Switches"
+    Write-Host "Enter the Number (min.1 - max.9) of Device: " -ForegroundColor Yellow -NoNewline
+    do {
+        $SWnumber = Read-Host
+        $vaNoD = $SWnumber -match '^[1-9]$'
+        if (!($vaNoD)) {
+            Write-Host "$SWnumber is not an valid Number." -ForegroundColor Red
+            Write-Host -fore Yellow "Please Enter a valid Number: " -NoNewline
+        }
+    } until ($vaNoD)
 
     <#For IPAddr Check#>
     $IPPattern = '^(?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$'

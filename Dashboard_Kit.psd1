@@ -15,7 +15,7 @@ RootModule = 'Dashboard_Kit.psm1'
 ModuleVersion = '0.0.1'
 
 # Supported PSEditions
-# CompatiblePSEditions = @()
+CompatiblePSEditions = @('Desktop')
 
 # ID used to uniquely identify this module
 GUID = '93d07539-d865-4a63-81fb-0cdb5eb1ad9b'
@@ -33,7 +33,7 @@ Copyright = '(c) ToolDoc. All rights reserved.'
 Description = 'Das Modul soll Sie im Umgang mit Ihrer IBM & Brocade SAN Umgebung in Verbindung mit der Powershell Version 7.x unterstützen'
 
 # Minimum version of the PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '5.1'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -51,7 +51,12 @@ Description = 'Das Modul soll Sie im Umgang mit Ihrer IBM & Brocade SAN Umgebung
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-# RequiredModules = @()
+RequiredModules = @(
+    @{
+    ModuleName = 'PSWriteHTML';
+    ModuleVersion = '1.17.0'
+    }
+)
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
@@ -95,28 +100,28 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('Dashboard','Helper','Tool','SAN','Brocade','Capture','Windows')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/DocCLF/Dashboard_Kit/blob/main/LICENSE.md'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/DocCLF/Dashboard_Kit'
 
         # A URL to an icon representing this module.
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = 'https://github.com/DocCLF/Dashboard_Kit/blob/main/CHANGELOG.md'
 
         # Prerelease string of this module
-        # Prerelease = ''
+        Prerelease = 'alpha'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
         # RequireLicenseAcceptance = $false
 
         # External dependent modules of this module
-        # ExternalModuleDependencies = @()
+        ExternalModuleDependencies = @('PSWriteHTML')
 
     } # End of PSData hashtable
 

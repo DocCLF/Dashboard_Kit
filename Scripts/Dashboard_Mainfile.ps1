@@ -22,70 +22,34 @@ function Dashboard_MainFuncion {
     
     [CmdletBinding()]
     param (
-
+        [Parameter(Mandatory)]
+        $FOS_CollectedDeviceInfos
     )
-    #$Credantails = Device_Credantials
-
-    <#
-    $Proto=$Credantails.Protocol
-    $UserName =$Credantails.UserName
-    $Credantails.IPAddress |ForEach-Object {Write-Host "test $_"}
-    #>
-    #region Hashtables
-    <#--------- Hashtable for BasicSwitch Info ------------#>
-    #$FOS_SwGeneralInfos =[ordered]@{}
-    <#----- Hashtable Unique information of the switch ----#>
-    #$FOS_SwBasicInfos =[ordered]@{}
-    <#----- Array Unique information of the switchports ----#>
-    #$FOS_SwBasicPortDetails=@()
-    #$FOS_usedPorts =@()
-
-    <#----- Array Unique information of the switch used at portbuffershow ----#>
-    #$FOS_pbs =@()
-    #endregion
-
-
-    <#--------------------Testarea maybe for later use -------------------#>
-    <# nothing included at the moment #>
-    <#---------------------------------------#>
-
-    #region DataCollect 
-    <# Collect some information for the Hastable, which is used for Basic SwitchInfos
-    if($Credantails.Protocol -eq 'plink'){
-        $FOS_advInfo = plink $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR -pw $Credantails.FOSCredPW -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
-    }else {
-        $FOS_advInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
-    }
-    #>
-    $FOS_advInfo = Get-Content -Path ".\sw2_col.txt"
-    <#----------------------- DataCollect ------------------#>
-    #endregion
-
 
     #region BasisInfosSwitch
-    $FOS_BasicSwitchInfo = GET_BasicSwitchInfos -FOS_MainInformation $FOS_advInfo
+    $FOS_BasicSwitchInfo = GET_BasicSwitchInfos -FOS_MainInformation $FOS_CollectedDeviceInfos
     <#------------------- BasisInfosSwitch -----------------------#>
     #endregion
 
     #region Switchshow
-    $FOS_SwitchShowInfo, $FOS_SwitchusedPorts = GET_SwitchShowInfo -FOS_MainInformation $FOS_advInfo
+    $FOS_SwitchShowInfo, $FOS_SwitchusedPorts = GET_SwitchShowInfo -FOS_MainInformation $FOS_CollectedDeviceInfos
     <#------------------- Switchshow -----------------------#>
     #endregion
 
     #region LogicalSwitch
     <#----------- LogicalSwitch/ FID Infos -----------#>
     <#----------- Unique information of the switch -----------#>
-    $FOS_UniqueSwitchInfo = GET_UniqueSwitchInfos -FOS_MainInformation $FOS_advInfo
+    $FOS_UniqueSwitchInfo = GET_UniqueSwitchInfos -FOS_MainInformation $FOS_CollectedDeviceInfos
     <#----------- Logical Switch/ FID Infos -----------#>
     #endregion
 
     #region Porterrshow
-    $FOS_PortErrShow = GET_PortErrShowInfos -FOS_MainInformation $FOS_advInfo -FOS_GetUsedPorts $FOS_SwitchusedPorts
+    $FOS_PortErrShow = GET_PortErrShowInfos -FOS_MainInformation $FOS_CollectedDeviceInfos -FOS_GetUsedPorts $FOS_SwitchusedPorts
     <#------------------- Porterrshow -----------------------#>
     #endregion
 
     #region Portbuffershow
-    $FOS_PortBuffershow = Get_PortbufferShowInfo -FOS_MainInformation $FOS_advInfo
+    $FOS_PortBuffershow = Get_PortbufferShowInfo -FOS_MainInformation $FOS_CollectedDeviceInfos
     <#------------------- Portbuffershow -----------------------#>
     #endregion
 
@@ -190,8 +154,9 @@ function Dashboard_MainFuncion {
     #>
     }
 }
+
 function Open_Brocade_Dashboard {
-    
+
     <#
     .SYNOPSIS
         A short one-line action-based description, e.g. 'Tests if a function is valid'
@@ -210,19 +175,46 @@ function Open_Brocade_Dashboard {
     param (
 
     )
-    Dashboard_MainFuncion
-    Start-Sleep -Seconds 2
-    Write-Host "Please Wait" -ForegroundColor Blue
-    Start-Sleep -Seconds 3
-    Invoke-Item -Path $Env:TEMP\Dashboard.html
 
-    return
-    
+    Write-Debug -Message "Func Open_Brocade_Dashboard |$(Get-Date)`n "
+    $DeviceCredantails = GET_DeviceCredantials
+
+    Write-Debug -Message "List of devices with access`n $DeviceCredantails `n`n"
+
+    foreach ($DeviceCredantail in $DeviceCredantails) {
+
+        Write-Host "Collect data from Device $($DeviceCredantails.id), please wait" -ForegroundColor Green
+        Start-Sleep -Seconds 1.5
+        <#----------------------- DataCollect ------------------#>
+        <# Collect some information for the Hastable, which is used for Basic SwitchInfos
+        if($Credantails.Protocol -eq 'plink'){
+            $FOS_CollectedDeviceInfo = plink $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR -pw $Credantails.FOSCredPW -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
+        }else {
+            $FOS_CollectedDeviceInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
+        }
+        #>
+
+        Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"
+
+        <# The bottom line is used for testing/ debuging #>
+        $FOS_CollectedDeviceInfo = Get-Content -Path ".\sw2_col.txt"
+        <#----------------------- DataCollect ------------------#>
+
+
+        Write-Debug -Message "Call the Dashboard_MainFuncion |$(Get-Date)`n"
+        Dashboard_MainFuncion -FOS_CollectedDeviceInfos $FOS_CollectedDeviceInfo
+        Start-Sleep -Seconds 1.5
+        Write-Host "Dashboard incoming, please wait" -ForegroundColor Blue
+        Start-Sleep -Seconds 2
+        Invoke-Item -Path $Env:TEMP\Dashboard.html
+        Write-Debug -Message "Dashboard $($DeviceCredantail.id) `n"
+    }
+    Write-Debug -Message "Func Open_Brocade_Dashboard, done |$(Get-Date)`n "
 }
 
-#openhtml
-#endregion
 
+#endregion
 #region CleanUp
+Write-Debug -Message "Cleaup all FOS* Variables Global |$(Get-Date)`n "
 #Clear-Variable FOS* -Scope Global;
 #endregion

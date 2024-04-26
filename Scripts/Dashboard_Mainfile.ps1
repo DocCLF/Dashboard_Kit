@@ -191,7 +191,7 @@ function Open_Brocade_Dashboard {
                 exit
             }
     }
-
+    process{
     Write-Debug -Message "Func Open_Brocade_Dashboard |$(Get-Date)`n "
     $DeviceCredantails = GET_DeviceCredantials
 
@@ -225,7 +225,10 @@ function Open_Brocade_Dashboard {
         Invoke-Item -Path $Env:TEMP\Dashboard.html
         Write-Debug -Message "Dashboard $($DeviceCredantail.id) `n"
     }
-    Write-Debug -Message "Func Open_Brocade_Dashboard, done |$(Get-Date)`n "
+    }
+    end{
+        Write-Debug -Message "Func Open_Brocade_Dashboard, done |$(Get-Date)`n "
+    }
 }
 
 

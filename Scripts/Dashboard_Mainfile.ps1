@@ -177,18 +177,32 @@ function Open_Brocade_Dashboard {
     )
     
     begin{
+        <# This check is necessary because the "RequiredModules" entry in the *psd1 file does not work. For the test phase this "q&d" solution is good enough. #>
         [string]$Version="1.17.0"
-        $RequiredModule = Get-Module -ListAvailable -Name PSReadLine | Sort-Object -Property Version -Descending | Select-Object -First 1
-        $ModuleVersion = "$($RequiredModule.Version)" #.Major)" + "." + "#$($RequiredModule.Version.Minor)"
-        if ($ModuleVersion -eq ".")  {
-            Write-Host "PSWriteHTML $Version or higher is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules.`nFurther execution of the function is terminated." -ForegroundColor Red
+        $RequiredModule = Get-Module -ListAvailable -Name PSWriteHTML | Sort-Object -Property Version -Descending | Select-Object -First 1
+        $ModuleVersion = "$($RequiredModule.Version)"
+        if ($RequiredModule -eq "")  {
+            Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
+		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
+		    start-sleep -seconds 10
             exit
         }elseif ($ModuleVersion -lt $Version) {
-            Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Update-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to update the required modules.`nFurther execution of the function is terminated. " -ForegroundColor Yellow
+            Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Update-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to update the required modules. " -ForegroundColor Yellow
+		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
+		    start-sleep -seconds 10
             exit
+        }elseif ($ModuleVersion -eq "") {
+            Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
+		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
+		    start-sleep -seconds 10
+            exit
+        }elseif ($ModuleVersion -gt $Version) {
+            Write-Host "Attention!`nYour version is $ModuleVersion and therefore newer than the tested version $Version and this may cause display problems." -ForegroundColor Yellow
         }else {
             <# Action when all if and elseif conditions are false #>
-            Write-Host "Something runs wrong.`nFurther execution of the function is terminated." -ForegroundColor Red
+            Write-Host "Something runs wrong." -ForegroundColor Red
+		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
+		    start-sleep -seconds 10
             exit
         }
     }

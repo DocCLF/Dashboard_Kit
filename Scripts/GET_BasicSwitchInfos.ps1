@@ -30,10 +30,10 @@ function GET_BasicSwitchInfos {
         $FOS_SwGeneralInfos =[ordered]@{}
 
         <# Collect all needed Infos #>
-        $FOS_FW_Info = ($FOS_advInfo | Select-String -Pattern '([v?][\d]\.[\d+]\.[\d]\w)$' -AllMatches).Matches.Value |Select-Object -Unique
-        $FOS_IP_AddrCFG = ($FOS_advInfo | Select-String -Pattern '(?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})').Matches.Value |Select-Object -Unique
-        $FOS_DHCP_CFG = (($FOS_advInfo | Select-String -Pattern '^DHCP:\s(\w+)$' -AllMatches).Matches.Value |Select-Object -Unique).Trim('DHCP: ')
-        $FOS_temp = ($FOS_advInfo | Select-String -Pattern 'switchType:\s(.*)$','switchState:\s(.*)$','switchRole:\s(.*)$' |ForEach-Object {$_.Matches.Groups[1].Value}).Trim()
+        $FOS_FW_Info = ($FOS_MainInformation | Select-String -Pattern '([v?][\d]\.[\d+]\.[\d]\w)$' -AllMatches).Matches.Value |Select-Object -Unique
+        $FOS_IP_AddrCFG = ($FOS_MainInformation | Select-String -Pattern '(?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})').Matches.Value |Select-Object -Unique
+        $FOS_DHCP_CFG = (($FOS_MainInformation | Select-String -Pattern '^DHCP:\s(\w+)$' -AllMatches).Matches.Value |Select-Object -Unique).Trim('DHCP: ')
+        $FOS_temp = ($FOS_MainInformation | Select-String -Pattern 'switchType:\s(.*)$','switchState:\s(.*)$','switchRole:\s(.*)$' |ForEach-Object {$_.Matches.Groups[1].Value}).Trim()
 
         Write-Debug -Message "FOS-Version $FOS_FW_Info ` IP-CFG $FOS_IP_AddrCFG ` DHCP $FOS_DHCP_CFG ` Switch $FOS_temp ` $(Get-Date)` "
 

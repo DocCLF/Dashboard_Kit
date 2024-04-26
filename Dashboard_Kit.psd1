@@ -51,12 +51,13 @@ PowerShellVersion = '5.1'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @(
-    @{
-    ModuleName = 'PSWriteHTML';
-    ModuleVersion = '1.17.0'
-    }
-)
+# RequiredModules = @(
+#     @{
+#     ModuleName = 'PSWriteHTML';
+#     ModuleVersion = '1.17.0'
+#     }
+# )
+<# RequiredModules does not work correctly #>
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()

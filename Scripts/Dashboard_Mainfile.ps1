@@ -55,13 +55,13 @@ function Dashboard_MainFuncion {
 
     #region Zoning
     if($FOS_SwBasicInfosold -ne $FOS_UniqueSwitchInfo[1]){
-        $FOS_ZoningInfo = GET_ZoneDetails |Select-Object -Skip 2
+        $FOS_ZoningInfo = GET_ZoneDetails -FOS_MainInformation $FOS_CollectedDeviceInfos #|Select-Object -Skip 2
         $FOS_SwBasicInfosold = $FOS_UniqueSwitchInfo[1]
     }else {
         <# Action when all if and elseif conditions are false #>
-        Write-Debug "$FOS_SwBasicInfosold is equal $($FOS_UniqueSwitchInfo[1])" -ForegroundColor Green
+        Write-Debug -Message "$FOS_SwBasicInfosold is equal $($FOS_UniqueSwitchInfo[1])"
     }
-    <#------------------- Zoning -----------------------#>
+   <#------------------- Zoning -----------------------#>
     #endregion
 
     #region HTML - Creation
@@ -180,7 +180,7 @@ function Open_Brocade_Dashboard {
         <# This check is necessary because the "RequiredModules" entry in the *psd1 file does not work. For the test phase this "q&d" solution is good enough. #>
         [string]$Version="1.17.0"
         $RequiredModule = Get-Module -ListAvailable -Name PSWriteHTML | Sort-Object -Property Version -Descending | Select-Object -First 1
-        $ModuleVersion = "$($RequiredModule.Version)"
+        $ModuleVersion = "$($RequiredModule.Version.Major)" + "." + "$($RequiredModule.Version.Minor)" + "." + "$($RequiredModule.Version.Build)"
         if ($RequiredModule -eq "")  {
             Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
 		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
@@ -200,10 +200,8 @@ function Open_Brocade_Dashboard {
             Write-Host "Attention!`nYour version is $ModuleVersion and therefore newer than the tested version $Version and this may cause display problems." -ForegroundColor Yellow
         }else {
             <# Action when all if and elseif conditions are false #>
-            Write-Host "Something runs wrong." -ForegroundColor Red
-		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
-		    start-sleep -seconds 10
-            exit
+            Write-Host "The check of the prerequisites for starting the function was successful, in 3 seconds it will continue." -ForegroundColor Green
+		    start-sleep -seconds 1
         }
     }
     process{
@@ -214,35 +212,45 @@ function Open_Brocade_Dashboard {
 
     foreach ($DeviceCredantail in $DeviceCredantails) {
 
-        Write-Host "Collect data from Device $($DeviceCredantails.id), please wait" -ForegroundColor Green
-        Start-Sleep -Seconds 1.5
+        Write-Host "Collect data from Device $($DeviceCredantail.id), please wait" -ForegroundColor Green
+        Start-Sleep -Seconds 1
         <#----------------------- DataCollect ------------------#>
-        <# Collect some information for the Hastable, which is used for Basic SwitchInfos
-        if($Credantails.Protocol -eq 'plink'){
-            $FOS_CollectedDeviceInfo = plink $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR -pw $Credantails.FOSCredPW -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
+        <# Collect some information for the Hastable, which is used for Basic SwitchInfos #>
+
+        if($DeviceCredantail.Protocol -eq 'plink'){
+            Write-Debug -Message "Start with Plink `n $DeviceCredantail `n"
+            $Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
+            $FOS_CollectedDeviceInfo = plink $DeviceCredantail.FOS_UserName@$DeviceCredantail.FOS_DeviceIPADDR -pw $Encrypted -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
         }else {
-            $FOS_CollectedDeviceInfo = ssh $Credantails.FOS_UserName@$Credantails.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow"
+            Write-Debug -Message "Start with ssh `n $DeviceCredantail `n"
+            $FOS_CollectedDeviceInfo = ssh $DeviceCredantail.FOS_UserName@$DeviceCredantail.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
         }
-        #>
 
         Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"
 
         <# The bottom line is used for testing/ debuging #>
-        $FOS_CollectedDeviceInfo = Get-Content -Path ".\sw2_col.txt"
+        #$FOS_CollectedDeviceInfo = Get-Content -Path ".\pbs_l.txt"
         <#----------------------- DataCollect ------------------#>
 
 
         Write-Debug -Message "Call the Dashboard_MainFuncion |$(Get-Date)`n"
         Dashboard_MainFuncion -FOS_CollectedDeviceInfos $FOS_CollectedDeviceInfo
-        Start-Sleep -Seconds 1.5
-        Write-Host "Dashboard incoming, please wait" -ForegroundColor Blue
+        Write-Debug -Message "Dashboard_MainFuncion, done |$(Get-Date)`n"
+        Start-Sleep -Seconds 1
+        Write-Host "Dashboard incoming, please wait..." -ForegroundColor Blue
         Start-Sleep -Seconds 2
+        Write-Debug -Message "call $Env:TEMP\Dashboard.html |$(Get-Date)`n"
         Invoke-Item -Path $Env:TEMP\Dashboard.html
         Write-Debug -Message "Dashboard $($DeviceCredantail.id) `n"
     }
     }
     end{
         Write-Debug -Message "Func Open_Brocade_Dashboard, done |$(Get-Date)`n "
+        #region CleanUp
+        Write-Debug -Message "Cleaup all FOS* Variables Global |$(Get-Date)`n "
+        Clear-Variable -Name Encrypted
+        Clear-Variable FOS* -Scope Global;
+        #endregion
     }
 }
 

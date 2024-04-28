@@ -21,33 +21,34 @@ function GET_ZoneDetails  {
     #>
     [CmdletBinding()]
     param (
-
+        [Parameter(Mandatory)]
+        [System.Object]$FOS_MainInformation
     )
     begin{
         Write-Debug -Message "Begin GET_ZoneDetails |$(Get-Date)"
 
         $FOS_ZoneCollection = @()
 
-        Write-Debug -Message "Zoneliste`n $FOS_ZoneList, `nZoneEntrys`n $FOS_ZoneEntrys, `nZoneCount`n $FOS_ZoneCollection "
+        Write-Debug -Message "`nZoneliste`n $FOS_ZoneList,`nZoneEntrys`n $FOS_ZoneEntrys,`nZoneCount`n $FOS_ZoneCollection "
         
     }
     process{
         Write-Debug -Message "Start of Process from GET_ZoneDetails |$(Get-Date)"
         # Creat a list of Aliase with WWPN based on the decision by AliasName, with a "wildcard" there is only a list similar Aliasen or without a Aliasname there will be all Aliases of the cfg in the List.
 
-        $FOS_BasicZoneList = Get-Content -Path ".\Schl_Fab2.txt"
+        #$FOS_BasicZoneList = Get-Content -Path ".\Schl_Fab2.txt"
         #$FOS_BasicZoneList = ssh $UserName@$($SwitchIP) "zoneshow"
-        $FOS_ZoneCount = $FOS_BasicZoneList.count
+        $FOS_ZoneCount = $FOS_MainInformation.count
 
         0..$FOS_ZoneCount |ForEach-Object {
             # Pull only the effective ZoneCFG back into ZoneList
-            if($FOS_BasicZoneList[$_] -match '^Effective'){
-                $FOS_ZoneList = $FOS_BasicZoneList |Select-Object -Skip $_
-                break
+            if($FOS_MainInformation[$_] -match '^Effective'){
+                $FOS_ZoneList = $FOS_MainInformation |Select-Object -Skip $_
+                #break
             }
         }
 
-        Write-Debug -Message "FOS_Operand Default`n, Search: zoneshow`n, Zoneliste`n $FOS_ZoneCount, `nZoneEntrys`n $FOS_BasicZoneList, `nZoneCount`n $FOS_ZoneList "
+        Write-Debug -Message "FOS_Operand Default`n, Search: zoneshow`n, Zoneliste`n $FOS_ZoneCount, `nZoneEntrys`n $FOS_MainInformation, `nZoneCount`n $FOS_ZoneList "
 
         # is not necessary, but even a system needs a break from time to time
         Start-Sleep -Seconds 2;
@@ -67,7 +68,7 @@ function GET_ZoneDetails  {
                     $FOS_TempCollection.WWPN = $FOS_AliWWN.Trim()
                     <# Boolean to control the do until loop #>
                     $FOS_DoUntilLoop = $true
-                    foreach($FOS_BasicZoneListTemp in $FOS_BasicZoneList){
+                    foreach($FOS_BasicZoneListTemp in $FOS_MainInformation){
                         <# Start of the do until loop #>
                         do {
                             if($FOS_BasicZoneListTemp -match '^ alias:\s(.*)'){
@@ -102,9 +103,9 @@ function GET_ZoneDetails  {
             }
 
             Write-Host "Here is the list of zones with WWPNs and their corresponding aliases:" -ForegroundColor Green
-            return $FOS_ZoneCollection
+            $FOS_ZoneCollection
 
-            Write-Debug -Message "$FOS_ZoneCollection `nEnd of Process block |$(Get-Date)"
+            #Write-Debug -Message "$FOS_ZoneCollection `nEnd of Process block |$(Get-Date)"
 
         }else {
              <# Action when all if and elseif conditions are false #>

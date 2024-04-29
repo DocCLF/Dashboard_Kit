@@ -209,21 +209,22 @@ function Open_Brocade_Dashboard {
     $DeviceCredantails = GET_DeviceCredantials
 
     Write-Debug -Message "List of devices with access`n $DeviceCredantails `n`n"
-
+    if($DeviceCredantail.Protocol -eq 'plink'){$Encrypted = Read-Host "Device Password: "}
     foreach ($DeviceCredantail in $DeviceCredantails) {
 
         Write-Host "Collect data from Device $($DeviceCredantail.id), please wait" -ForegroundColor Green
         Start-Sleep -Seconds 1
         <#----------------------- DataCollect ------------------#>
         <# Collect some information for the Hastable, which is used for Basic SwitchInfos #>
-
+        $UserName = $DeviceCredantail.UserName
+        $IPAddress = $DeviceCredantail.IPAddress
         if($DeviceCredantail.Protocol -eq 'plink'){
             Write-Debug -Message "Start with Plink `n $DeviceCredantail `n"
-            $Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
-            $FOS_CollectedDeviceInfo = plink $DeviceCredantail.FOS_UserName@$DeviceCredantail.FOS_DeviceIPADDR -pw $Encrypted -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+            #$Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
+            $FOS_CollectedDeviceInfo = plink $UserName@$IPAddress -pw $Encrypted -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
         }else {
             Write-Debug -Message "Start with ssh `n $DeviceCredantail `n"
-            $FOS_CollectedDeviceInfo = ssh $DeviceCredantail.FOS_UserName@$DeviceCredantail.FOS_DeviceIPADDR "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+            $FOS_CollectedDeviceInfo = ssh $UserName@$IPAddress "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
         }
 
         Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"

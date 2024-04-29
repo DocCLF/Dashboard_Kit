@@ -102,7 +102,7 @@ function GET_ZoneDetails  {
                 $FOS_ZoneCollection += $FOS_TempCollection
             }
 
-            Write-Host "Here is the list of zones with WWPNs and their corresponding aliases:" -ForegroundColor Green
+            Write-Debug "Here is the list of zones with WWPNs and their corresponding aliases:" -ForegroundColor Green
             $FOS_ZoneCollection
 
             #Write-Debug -Message "$FOS_ZoneCollection `nEnd of Process block |$(Get-Date)"

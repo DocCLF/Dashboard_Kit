@@ -59,7 +59,7 @@ function GET_DeviceCredantials {
 
             <#Test the Conection to the device works but need more inprovement #>
             #$FOS_OnorOff=Test-Connection $IPADR -Count 1
-            if($FOS_OnorOff.Status -ne "Success"){Write-Host "Your entered IP: $IPADR is not reachable, please check the connection and try again." -ForegroundColor Red;} #optional a Exit if no resp.
+            if($FOS_OnorOff.Status -ne "Success"){Write-Host "Your entered IP: $IPADR is maybe not reachable, if connection fails please check the connection and try again." -ForegroundColor Red;} #optional a Exit if no resp.
             $CredantialsCollect.Add('ID',$Device)
             $CredantialsCollect.Add('IPAddress',$IPADR)
            

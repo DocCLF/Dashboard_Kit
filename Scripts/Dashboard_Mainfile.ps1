@@ -200,50 +200,55 @@ function Open_Brocade_Dashboard {
             Write-Host "Attention!`nYour version is $ModuleVersion and therefore newer than the tested version $Version and this may cause display problems." -ForegroundColor Yellow
         }else {
             <# Action when all if and elseif conditions are false #>
-            Write-Host "The check of the prerequisites for starting the function was successful, in 3 seconds it will continue." -ForegroundColor Green
+            Write-Host "The check of the prerequisites for starting the function was successful." -ForegroundColor Green
 		    start-sleep -seconds 1
         }
     }
     process{
     Write-Debug -Message "Func Open_Brocade_Dashboard |$(Get-Date)`n "
     $DeviceCredantails = GET_DeviceCredantials
+    $DCounter=$DeviceCredantails.Count
+    $CDevice=0
 
     Write-Debug -Message "List of devices with access`n $DeviceCredantails `n`n"
     if($DeviceCredantail.Protocol -eq 'plink'){$Encrypted = Read-Host "Device Password: "}
-    foreach ($DeviceCredantail in $DeviceCredantails) {
+        foreach ($DeviceCredantail in $DeviceCredantails) {
 
-        Write-Host "Collect data from Device $($DeviceCredantail.id), please wait" -ForegroundColor Green
-        Start-Sleep -Seconds 1
-        <#----------------------- DataCollect ------------------#>
-        <# Collect some information for the Hastable, which is used for Basic SwitchInfos #>
-        $UserName = $DeviceCredantail.UserName
-        $IPAddress = $DeviceCredantail.IPAddress
-        if($DeviceCredantail.Protocol -eq 'plink'){
-            Write-Debug -Message "Start with Plink `n $DeviceCredantail `n"
-            #$Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
-            $FOS_CollectedDeviceInfo = plink $UserName@$IPAddress -pw $Encrypted -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
-        }else {
-            Write-Debug -Message "Start with ssh `n $DeviceCredantail `n"
-            $FOS_CollectedDeviceInfo = ssh $UserName@$IPAddress "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+            Write-Host "Collect data from Device $($DeviceCredantail.id), please wait" -ForegroundColor Green
+            Write-Progress -Activity "Checking Device" -Status "$PercentComplete% Complete:" -PercentComplete $PercentComplete
+            $CDevice = $DeviceCredantail.id
+            $PercentComplete = [int](($CDevice / $DCounter) * 100)
+            Start-Sleep -Seconds 1
+            <#----------------------- DataCollect ------------------#>
+            <# Collect some information for the Hastable, which is used for Basic SwitchInfos #>
+            $UserName = $DeviceCredantail.UserName
+            $IPAddress = $DeviceCredantail.IPAddress
+            if($DeviceCredantail.Protocol -eq 'plink'){
+                Write-Debug -Message "Start with Plink `n $DeviceCredantail `n"
+                #$Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
+                $FOS_CollectedDeviceInfo = plink $UserName@$IPAddress -pw $Encrypted -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+            }else {
+                Write-Debug -Message "Start with ssh `n $DeviceCredantail `n"
+                $FOS_CollectedDeviceInfo = ssh $UserName@$IPAddress "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+            }
+
+            Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"
+
+            <# The bottom line is used for testing/ debuging #>
+            #$FOS_CollectedDeviceInfo = Get-Content -Path ".\pbs_l.txt"
+            <#----------------------- DataCollect ------------------#>
+
+
+            Write-Debug -Message "Call the Dashboard_MainFuncion |$(Get-Date)`n"
+            Dashboard_MainFuncion -FOS_CollectedDeviceInfos $FOS_CollectedDeviceInfo
+            Write-Debug -Message "Dashboard_MainFuncion, done |$(Get-Date)`n"
+            Start-Sleep -Seconds 1
+            Write-Host "Dashboard incoming, please wait..." -ForegroundColor Blue
+            Start-Sleep -Seconds 2
+            Write-Debug -Message "call $Env:TEMP\Dashboard.html |$(Get-Date)`n"
+            Invoke-Item -Path $Env:TEMP\Dashboard.html
+            Write-Debug -Message "Dashboard $($DeviceCredantail.id) `n"
         }
-
-        Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"
-
-        <# The bottom line is used for testing/ debuging #>
-        #$FOS_CollectedDeviceInfo = Get-Content -Path ".\pbs_l.txt"
-        <#----------------------- DataCollect ------------------#>
-
-
-        Write-Debug -Message "Call the Dashboard_MainFuncion |$(Get-Date)`n"
-        Dashboard_MainFuncion -FOS_CollectedDeviceInfos $FOS_CollectedDeviceInfo
-        Write-Debug -Message "Dashboard_MainFuncion, done |$(Get-Date)`n"
-        Start-Sleep -Seconds 1
-        Write-Host "Dashboard incoming, please wait..." -ForegroundColor Blue
-        Start-Sleep -Seconds 2
-        Write-Debug -Message "call $Env:TEMP\Dashboard.html |$(Get-Date)`n"
-        Invoke-Item -Path $Env:TEMP\Dashboard.html
-        Write-Debug -Message "Dashboard $($DeviceCredantail.id) `n"
-    }
     }
     end{
         Write-Debug -Message "Func Open_Brocade_Dashboard, done |$(Get-Date)`n "

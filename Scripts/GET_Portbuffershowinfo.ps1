@@ -35,6 +35,7 @@ function GET_PortbufferShowInfo {
         0..$FOS_InfoCount |ForEach-Object {
             # Pull only the effective ZoneCFG back into ZoneList
             if($FOS_MainInformation[$_] -match 'Buffers$'){
+                if($FOS_MainInformation[$_] -match '^Defined'){break}
                 $FOS_pbs_temp = $FOS_MainInformation |Select-Object -Skip $_
                 $FOS_Temp_var = $FOS_pbs_temp |Select-Object -Skip 2
             

@@ -181,7 +181,8 @@ function Open_Brocade_Dashboard {
         [string]$Version="1.17.0"
         $RequiredModule = Get-Module -ListAvailable -Name PSWriteHTML | Sort-Object -Property Version -Descending | Select-Object -First 1
         $ModuleVersion = "$($RequiredModule.Version.Major)" + "." + "$($RequiredModule.Version.Minor)" + "." + "$($RequiredModule.Version.Build)"
-        if ($RequiredModule -eq "")  {
+        Write-Host "`nFurther $ModuleVersion " -ForegroundColor Magenta
+        if ($ModuleVersion -eq "..")  {
             Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
             $UserImput = Read-Host "Try to install type y or n"
             if($UserImput -eq "y"){
@@ -189,26 +190,20 @@ function Open_Brocade_Dashboard {
                 $InstallJob_PSWH | Wait-Job
             }else {
                 Write-Host "`nFurther execution of the function is terminated, in 5s" -ForegroundColor Red
-		        Start-Sleep -seconds 5
+		        Start-Sleep -seconds 6
                 exit
             }
             if($InstallJob_PSWH.State -eq "Completed") {
-                Write-Host "`nThe installation of PSWriteHTML seems to have been successful, the function will now be closed.`nPlease restart the application." -ForegroundColor Green
-                Start-Sleep -Seconds 5
+                Write-Host "`nThe installation of PSWriteHTML seems to have been successful, the function will now be closed.`nPlease restart powershell." -ForegroundColor Green
+                Start-Sleep -Seconds 8
                 exit
             }else {
                 Write-Host "`nSomething went wrong, please install PSWriteHTML manually using the ' Install-Module -Name PSWriteHTML -RequiredVersion 1.17.0 -Force -Scope CurrentUser ' command.`nThe application will now be closed." -ForegroundColor Red
-                Start-Sleep -Seconds 5
+                Start-Sleep -Seconds 8
                 exit
             }
-
         }elseif ($ModuleVersion -lt $Version) {
             Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Update-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to update the required modules. " -ForegroundColor Yellow
-		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
-		    start-sleep -seconds 10
-            exit
-        }elseif ($ModuleVersion -eq "") {
-            Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
 		    Write-Host "`nFurther execution of the function is terminated, in 10s" -ForegroundColor Red
 		    start-sleep -seconds 10
             exit

@@ -181,7 +181,7 @@ function Open_Brocade_Dashboard {
         [string]$Version="1.17.0"
         $RequiredModule = Get-Module -ListAvailable -Name PSWriteHTML | Sort-Object -Property Version -Descending | Select-Object -First 1
         $ModuleVersion = "$($RequiredModule.Version.Major)" + "." + "$($RequiredModule.Version.Minor)" + "." + "$($RequiredModule.Version.Build)"
-        Write-Host "`nFurther $ModuleVersion " -ForegroundColor Magenta
+        Write-Debug -Message $ModuleVersion
         if ($ModuleVersion -eq "..")  {
             Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
             $UserImput = Read-Host "Try to install type y or n"
@@ -246,7 +246,7 @@ function Open_Brocade_Dashboard {
             Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"
 
             <# The bottom line is used for testing/ debuging #>
-            #$FOS_CollectedDeviceInfo = Get-Content -Path ".\pbs_l.txt"
+            #$FOS_CollectedDeviceInfo = Get-Content -Path ".\sw1_col.txt"
             <#----------------------- DataCollect ------------------#>
 
 
@@ -254,10 +254,10 @@ function Open_Brocade_Dashboard {
             Dashboard_MainFuncion -FOS_CollectedDeviceInfos $FOS_CollectedDeviceInfo
             Write-Debug -Message "Dashboard_MainFuncion, done |$(Get-Date)`n"
             Start-Sleep -Seconds 1
-            Write-Host "Dashboard incoming, please wait..." -ForegroundColor Blue
+            Write-Host "Dashboard incoming, please wait..." -ForegroundColor Green
             Start-Sleep -Seconds 2
             Write-Debug -Message "call $Env:TEMP\Dashboard.html |$(Get-Date)`n"
-            Invoke-Item -Path $Env:TEMP\Dashboard.html
+            Start-Process -FilePath $Env:TEMP\Dashboard.html
             Write-Debug -Message "Dashboard $($DeviceCredantail.id) `n"
         }
     }

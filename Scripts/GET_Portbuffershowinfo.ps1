@@ -30,12 +30,11 @@ function GET_PortbufferShowInfo {
         Write-Debug -Message "Start Func Get_PortbufferShowInfo |$(Get-Date)` "
         <# Create an array #>
         $FOS_pbs =@()
-
+        #$FOS_MainInformation=Get-Content -Path ".\sw1_col.txt"
         $FOS_InfoCount = $FOS_MainInformation.count
         0..$FOS_InfoCount |ForEach-Object {
             # Pull only the effective ZoneCFG back into ZoneList
             if($FOS_MainInformation[$_] -match 'Buffers$'){
-                if($FOS_MainInformation[$_] -match '^Defined'){break}
                 $FOS_pbs_temp = $FOS_MainInformation |Select-Object -Skip $_
                 $FOS_Temp_var = $FOS_pbs_temp |Select-Object -Skip 2
             
@@ -45,6 +44,9 @@ function GET_PortbufferShowInfo {
 
     process{
         foreach ($FOS_thisLine in $FOS_Temp_var) {
+            <# Only collect data up to the next section, marked by Defined #>
+            if($FOS_thisLine -match '^Defined'){break}
+
             #create a var and pipe some objects in and fill them with some data
             $FOS_PortBuff = "" | Select-Object Port,Type,Mode,Max_Resv,Tx,Rx,Usage,Buffers,Distance,Buffer
             # Index number of the port.

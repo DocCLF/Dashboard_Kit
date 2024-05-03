@@ -3,18 +3,17 @@ using namespace System.Net
 function GET_DeviceCredantials {
     <#
     .SYNOPSIS
-        A short one-line action-based description, e.g. 'Tests if a function is valid'
+        Collects the access data
     .DESCRIPTION
-        A longer description of the function, its purpose, common use cases, etc.
+        Collects the access data and prepares it for the main function.
     .NOTES
-        Information or caveats about the function e.g. 'This function is not supported in Linux'
+        The function has so far only been tested under Windows, the application is still in alpha status.
+        The basic function works as intended, but some adjustments should be made, especially with regard to the user name/password.
     .LINK
-        Specify a URI to a help page, this will show when Get-Help -Online is used.
+        https://github.com/DocCLF/Dashboard_Kit/blob/main/Scripts/GET_DeviceCredantials.ps1
     .EXAMPLE
-        Test-MyTestFunction -Verbose
-        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+        not required
     #>
-    
     
     [CmdletBinding()]
     param (
@@ -59,11 +58,10 @@ function GET_DeviceCredantials {
 
             <#Test the Conection to the device works but need more inprovement #>
             #$FOS_OnorOff=Test-Connection $IPADR -Count 1
-            if($FOS_OnorOff.Status -ne "Success"){Write-Host "Your entered IP: $IPADR is maybe not reachable, if connection fails please check the connection and try again." -ForegroundColor Red;} #optional a Exit if no resp.
+            if($FOS_OnorOff.Status -ne "Success"){Write-Host "Your entered IP: $IPADR is maybe not reachable,`nif connection fails please check the connection and try again." -ForegroundColor Yellow;} #optional a Exit if no resp.
             $CredantialsCollect.Add('ID',$Device)
             $CredantialsCollect.Add('IPAddress',$IPADR)
            
-
             [string]$Protocol=Read-Host "
             1 - ssh
             2 - plink
@@ -73,11 +71,11 @@ function GET_DeviceCredantials {
                 2 { $Protocol="plink" }
             }
             $CredantialsCollect.Add('Protocol',$Protocol)
-            [string]$UserName = Read-Host "enter the UserName of the device"
+            [string]$UserName = Read-Host "Enter the UserName of the device"
             $CredantialsCollect.Add('UserName',$UserName) 
 
             if($Protocol -eq "plink"){
-                $UserPassword = Read-Host "enter the Password of the device"
+                $UserPassword = Read-Host "Enter the Password of the device"
                 $UserPassword = ConvertTo-SecureString -String $UserPassword -AsPlainText
                 $CredantialsCollect.Add('Password',$UserPassword)
             }

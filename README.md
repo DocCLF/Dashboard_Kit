@@ -1,4 +1,4 @@
-# Dashboard
+# Dashboard Kit
 
 The dashboard kit collects various information about the SAN switches specified (in the first version) and makes it available on an HTML page. 
 I created this kit to get a quick overview of an existing SAN infrastructure without having to log in to x switches with x commands. 

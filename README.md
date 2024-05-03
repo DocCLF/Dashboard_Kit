@@ -29,8 +29,9 @@ That's it. Whenever there's a new version you simply run the command and you can
 * information will follow
 
 ## Requirements
-[PowerShell 5.1 or 7.4.x][] 
-[PSWriteHTML - PowerShell Module v1.17.0][] If PSWriteHTML is not installed, it can be installed automatically after the start of Open_Brocade_Dashboard
+[PowerShell][] 5.1 or 7.4.x\
+[PSWriteHTML][]- PowerShell Module v1.17.0 
+* If PSWriteHTML is not installed, it can be installed automatically after the start the function with: Open_Brocade_Dashboard
 
 [PowerShell]: https://github.com/PowerShell/PowerShell
 [PSWriteHTML]: https://github.com/EvotecIT/PSWriteHTML

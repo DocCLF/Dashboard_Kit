@@ -185,7 +185,7 @@ function Open_Brocade_Dashboard {
         Write-Debug -Message $ModuleVersion
         if ($ModuleVersion -eq "..")  {
             Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
-            $UserImput = Read-Host "Try to install type y or n"
+            $UserImput = Read-Host "Or try to install automatically, type y or n"
             if($UserImput -eq "y"){
                 $InstallJob_PSWH = Start-Job -ScriptBlock {Install-Module -Name PSWriteHTML -RequiredVersion 1.17.0 -Force -Scope CurrentUser}
                 $InstallJob_PSWH | Wait-Job

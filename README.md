@@ -54,8 +54,16 @@ That's it. Whenever there's a new version you simply run the command and you can
 
 See [changelog](CHANGELOG.md) for all changes and releases.
 
+## Pictures
+Main page, overview with (in my opinion) important information about the switch.
+<img width="1897" alt="dashboard_overview" src="https://github.com/DocCLF/Dashboard_Kit/assets/9890682/397b7dea-e360-404f-a7d0-39aac8a62453">
+
+Effective configuration (Zoning)
+<img width="1605" alt="zoning_overview" src="https://github.com/DocCLF/Dashboard_Kit/assets/9890682/35f10dfc-1272-4228-80b3-b0f85a8b47f9">
+
 ## For more information
 
 * [Dashboard_Kit](https://github.com/DocCLF/Dashboard_Kit)
+* or contact me here or linkedin
 
 **Enjoy!**

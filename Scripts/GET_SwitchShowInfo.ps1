@@ -69,7 +69,7 @@ function GET_SwitchShowInfo {
                 <# Protocol support by GbE port. #>
                 $FOS_SWsh.Proto = ($FOS_linebyLine |Select-String -Pattern '(\w+_\w+|\w+)\s+(FC)' -AllMatches).Matches.Groups.Value[2]
                 <# WWPN or other Infos #>
-                $FOS_SWsh.PortConnect = $FOS_linebyLine.Substring(50).Trim()
+                $FOS_SWsh.PortConnect = $FOS_linebyLine.Substring(50).Trim() <# in some environments it may be necessary to switch from 50 to 48, especially when using the egde as default browser #>
                 $FOS_SwBasicPortDetails += $FOS_SWsh
             }
 

@@ -7,18 +7,17 @@ function Dashboard_MainFuncion {
 
     <#
     .SYNOPSIS
-        A short one-line action-based description, e.g. 'Tests if a function is valid'
+        Includes all sub-functions
     .DESCRIPTION
-        A longer description of the function, its purpose, common use cases, etc.
+        Includes all sub-functions and can be expanded and reduced as required, making it easier to maintain overall. 
+        If a sub-function is removed, this should also be removed from the html call at the end.
     .NOTES
-        Information or caveats about the function e.g. 'This function is not supported in Linux'
+        The function has so far only been tested under Windows, the application is still in alpha status.
     .LINK
-        Specify a URI to a help page, this will show when Get-Help -Online is used.
+        https://github.com/DocCLF/Dashboard_Kit/blob/main/Scripts/Dashboard_Mainfile.ps1
     .EXAMPLE
-        Test-MyTestFunction -Verbose
-        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
-    #>
-    
+
+    #>  
     
     [CmdletBinding()]
     param (
@@ -159,16 +158,18 @@ function Open_Brocade_Dashboard {
 
     <#
     .SYNOPSIS
-        A short one-line action-based description, e.g. 'Tests if a function is valid'
+        Main function
     .DESCRIPTION
-        A longer description of the function, its purpose, common use cases, etc.
+        Main function that checks the inventory for its prerequisites and then triggers all other functions.
     .NOTES
-        Information or caveats about the function e.g. 'This function is not supported in Linux'
+        The function has so far only been tested under Windows, the application is still in alpha status.
+        This script supports the common parameters: Verbose, Debug
     .LINK
-        Specify a URI to a help page, this will show when Get-Help -Online is used.
+        https://github.com/DocCLF/Dashboard_Kit
     .EXAMPLE
-        Test-MyTestFunction -Verbose
-        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+        Open_Brocade_Dashboard
+        or
+        Open_Brocade_Dashboard -Debug
     #>
     
     [CmdletBinding()]
@@ -216,13 +217,13 @@ function Open_Brocade_Dashboard {
         }
     }
     process{
-    Write-Debug -Message "Func Open_Brocade_Dashboard |$(Get-Date)`n "
-    $DeviceCredantails = GET_DeviceCredantials
-    $DCounter=$DeviceCredantails.Count
-    $CDevice=0
+        Write-Debug -Message "Func Open_Brocade_Dashboard |$(Get-Date)`n "
+        $DeviceCredantails = GET_DeviceCredantials
+        $DCounter=$DeviceCredantails.Count
+        $CDevice=0
 
-    Write-Debug -Message "List of devices with access`n $DeviceCredantails `n`n"
-    if($DeviceCredantail.Protocol -eq 'plink'){$Encrypted = Read-Host "Device Password: "}
+        Write-Debug -Message "List of devices with access`n $DeviceCredantails `n`n"
+        if($DeviceCredantail.Protocol -eq 'plink'){$Encrypted = Read-Host "Device Password: "}
         foreach ($DeviceCredantail in $DeviceCredantails) {
 
             Write-Host "Collect data from Device $($DeviceCredantail.id), please wait" -ForegroundColor Green
@@ -271,9 +272,3 @@ function Open_Brocade_Dashboard {
     }
 }
 
-
-#endregion
-#region CleanUp
-Write-Debug -Message "Cleaup all FOS* Variables Global |$(Get-Date)`n "
-#Clear-Variable FOS* -Scope Global;
-#endregion

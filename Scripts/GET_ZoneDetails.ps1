@@ -3,21 +3,17 @@ using namespace System.Net
 function GET_ZoneDetails  {
     <#
     .SYNOPSIS
-    Displays zone information.
-
+        Displays zone information.
     .DESCRIPTION
-    Use this command to display zone configuration information. 
-    This command includes sorting and search options to customize the output. 
-    If a pattern is specified, the command displays only matching zone configuration names in the defined configuration. 
-    When used without operands, the command displays all zone configuration information for the Defined and the Effective configuration.        
-
+        Use this command to display zone configuration information. 
+        This command includes sorting and search options to customize the output. 
+        If a pattern is specified, the command displays only matching zone configuration names in the defined configuration. 
+        When used without operands, the command displays all zone configuration information for the Defined and the Effective configuration.        
     .EXAMPLE
-    Display all zones
-    GET_ZoneDetails
-        
+        not required
     .LINK
-    Brocade® Fabric OS® Command Reference Manual, 9.2.x
-    https://techdocs.broadcom.com/us/en/fibre-channel-networking/fabric-os/fabric-os-commands/9-2-x/Fabric-OS-Commands.html
+        Brocade® Fabric OS® Command Reference Manual, 9.2.x
+        https://techdocs.broadcom.com/us/en/fibre-channel-networking/fabric-os/fabric-os-commands/9-2-x/Fabric-OS-Commands.html
     #>
     [CmdletBinding()]
     param (

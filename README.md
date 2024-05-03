@@ -12,6 +12,7 @@ To Sart the function call: Open_Brocade_Dashboard
 ```powershell
 Install-Module -Name Dashboard_Kit -AllowClobber -Force
 ```
+### Import
 Change change directory with: cd c:\<path>\Dashboard_kit\
 Import-Module is a temporary installation, which will be deleted after closing the powershell.
 ```powershell

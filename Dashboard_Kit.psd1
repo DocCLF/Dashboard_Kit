@@ -12,7 +12,7 @@
 RootModule = 'Dashboard_Kit.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.1'
+ModuleVersion = '0.0.2'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Desktop')
@@ -30,7 +30,7 @@ CompanyName = 'Unknown'
 Copyright = '(c) ToolDoc. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Das Modul soll Sie im Umgang mit Ihrer IBM & Brocade SAN Umgebung in Verbindung mit der Powershell Version 7.x unterstützen'
+Description = 'The module is intended to support you in dealing with your IBM & Brocade SAN environment in conjunction with Powershell version 5.1.x and 7.x'
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '5.1'

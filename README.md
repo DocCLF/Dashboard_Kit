@@ -8,11 +8,17 @@ To Sart the function call: Open_Brocade_Dashboard
 
 ... further motives or information will follow ...
 
-### Installing (NOT WORKING at THE Moment use Import-Module)
+### Installing
 ```powershell
-Install-Module -Name Dashboard_Kit -AllowClobber -Force
+Install-Module -Name Dashboard_Kit -AllowClobber -AllowPrerelease -Force
 ```
+If the module is not activated automatically, then it is necessary to import it later, depending on the version of PowerShell (see Pic).
+```powershell
+Import-Module Dashboard_Kit
+```
+
 ### Import
+Download it from Git and Import it manually
 Change change directory with: cd c:\<path>\Dashboard_kit\
 Import-Module is a temporary installation, which will be deleted after closing the powershell.
 ```powershell

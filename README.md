@@ -16,6 +16,7 @@ If the module is not activated automatically, then it is necessary to import it 
 ```powershell
 Import-Module Dashboard_Kit
 ```
+<img width="1897" alt="Unbenannt" src="https://github.com/DocCLF/Dashboard_Kit/assets/9890682/198bb199-640f-49e6-9d22-96cdd7f4ffc5">
 
 ### Import
 Download it from Git and Import it manually

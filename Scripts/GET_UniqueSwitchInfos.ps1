@@ -28,8 +28,6 @@ function GET_UniqueSwitchInfos {
         Write-Debug -Message "Start Func GET_UniqueSwitchInfos |$(Get-Date)` "
         <# Create an ordered hashtable #>
         $FOS_SwBasicInfos =[ordered]@{}
-
-        $FOS_MainInformation = Get-Content -Path ".\sw1_col.txt"
     }
     process{
         <# collect the information with the help of regex pattern and remove the blanks with the help of replace and trim #>

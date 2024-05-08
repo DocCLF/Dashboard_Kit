@@ -41,12 +41,17 @@ function GET_UniqueSwitchInfos {
         $FOS_SwBasicInfos.Add('Switch WWN',$FOS_LoSw_CFG[2])
 
         <# Workaround if VF is not enabled #>
-        if(($FOS_MainInformation | Select-String -Pattern 'SwitchType:\s(\w+)$' |ForEach-Object {$_.Matches.Groups[1].Value}) -ne ("DS" -or "LS")) {
+        $FOS_LoSw_Temp = (($FOS_MainInformation | Select-String -Pattern 'SwitchType:\s+(\w+)$' -AllMatches).Matches.groups[1].Value)
+        if(!($FOS_LoSw_Temp)) {
             $FOS_SwBasicInfos.Add('SwitchType','DS')
         }else {
-            $FOS_SwBasicInfos.Add('SwitchType',($FOS_MainInformation | Select-String -Pattern 'SwitchType:\s(\w+)$' |ForEach-Object {$_.Matches.Groups[1].Value}))
+            $FOS_SwBasicInfos.Add('SwitchType',(($FOS_MainInformation | Select-String -Pattern 'SwitchType:\s+(\w+)$' -AllMatches).Matches.groups[1].Value))
         }
-        $FOS_SwBasicInfos.Add('Fabric ID',($FOS_MainInformation | Select-String -Pattern 'FID:\s(\d+)' |ForEach-Object {$_.Matches.Groups[1].Value}))
+        if(($FOS_MainInformation | Select-String -Pattern '\[FID:\s(\d+)' |ForEach-Object {$_.Matches.Groups[1].Value}).count -eq 1) {
+            $FOS_SwBasicInfos.Add('Fabric ID',($FOS_MainInformation | Select-String -Pattern '\[FID:\s(\d+)' |ForEach-Object {$_.Matches.Groups[1].Value}))
+        }else{
+            $FOS_SwBasicInfos.Add('Fabric ID','unknown')
+        }
         
     }
     end{

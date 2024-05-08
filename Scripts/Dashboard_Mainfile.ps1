@@ -238,10 +238,10 @@ function Open_Brocade_Dashboard {
             if($DeviceCredantail.Protocol -eq 'plink'){
                 Write-Debug -Message "Start with Plink `n $DeviceCredantail `n"
                 #$Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
-                $FOS_CollectedDeviceInfo = plink $UserName@$IPAddress -pw $Encrypted -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+                $FOS_CollectedDeviceInfo = plink $UserName@$IPAddress -pw $Encrypted -batch "firmwareshow && ipaddrshow && switchshow && porterrshow && portbuffershow && zoneshow"
             }else {
                 Write-Debug -Message "Start with ssh `n $DeviceCredantail `n"
-                $FOS_CollectedDeviceInfo = ssh $UserName@$IPAddress "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+                $FOS_CollectedDeviceInfo = ssh $UserName@$IPAddress "firmwareshow && ipaddrshow && switchshow && porterrshow && portbuffershow && zoneshow"
             }
 
             Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"

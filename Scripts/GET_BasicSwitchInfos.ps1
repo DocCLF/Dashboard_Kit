@@ -40,6 +40,8 @@ function GET_BasicSwitchInfos {
         if($FOS_temp[2] -like "1*"){
             # with VF jump in here
             switch ($FOS_temp[2]) {
+                {$_ -like "109*"}  { $FOS_SwHw = "Brocade 6510" }
+                {$_ -like "118*"}  { $FOS_SwHw = "Brocade 6505" }
                 {$_ -like "170*"}  { $FOS_SwHw = "Brocade G610" }
                 {$_ -like "162*"}  { $FOS_SwHw = "Brocade G620" }
                 {$_ -like "183*"}  { $FOS_SwHw = "Brocade G620" }
@@ -55,6 +57,8 @@ function GET_BasicSwitchInfos {
         }else {
             # else jump in here
             switch ($FOS_temp[1]) {
+                {$_ -like "109*"}  { $FOS_SwHw = "Brocade 6510" }
+                {$_ -like "118*"}  { $FOS_SwHw = "Brocade 6505" }
                 {$_ -like "170*"}  { $FOS_SwHw = "Brocade G610" }
                 {$_ -like "162*"}  { $FOS_SwHw = "Brocade G620" }
                 {$_ -like "183*"}  { $FOS_SwHw = "Brocade G620" }

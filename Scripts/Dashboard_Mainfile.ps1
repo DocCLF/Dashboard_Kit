@@ -187,6 +187,7 @@ function Open_Brocade_Dashboard {
             Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
             $UserImput = Read-Host "Or try to install automatically, type y or n"
             if($UserImput -eq "y"){
+                Write-Host "Please wait, an attempt will be made to install PSWriteHTML, this can take up to 30 seconds." -ForegroundColor Green
                 $InstallJob_PSWH = Start-Job -ScriptBlock {Install-Module -Name PSWriteHTML -RequiredVersion 1.17.0 -Force -Scope CurrentUser}
                 $InstallJob_PSWH | Wait-Job
             }else {
@@ -195,9 +196,7 @@ function Open_Brocade_Dashboard {
                 exit
             }
             if($InstallJob_PSWH.State -eq "Completed") {
-                Write-Host "`nThe installation of PSWriteHTML seems to have been successful, the function will now be closed.`nPlease restart powershell." -ForegroundColor Green
-                Start-Sleep -Seconds 8
-                exit
+                Write-Host "`nThe installation of PSWriteHTML seems to have been successful." -ForegroundColor Green
             }else {
                 Write-Host "`nSomething went wrong, please install PSWriteHTML manually using the ' Install-Module -Name PSWriteHTML -RequiredVersion 1.17.0 -Force -Scope CurrentUser ' command.`nThe application will now be closed." -ForegroundColor Red
                 Start-Sleep -Seconds 8

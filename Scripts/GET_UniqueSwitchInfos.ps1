@@ -28,21 +28,28 @@ function GET_UniqueSwitchInfos {
         Write-Debug -Message "Start Func GET_UniqueSwitchInfos |$(Get-Date)` "
         <# Create an ordered hashtable #>
         $FOS_SwBasicInfos =[ordered]@{}
+
+        $FOS_MainInformation = Get-Content -Path ".\sw1_col.txt"
     }
     process{
         <# collect the information with the help of regex pattern and remove the blanks with the help of replace and trim #>
-        $FOS_LoSw_CFG = (($FOS_MainInformation | Select-String -Pattern 'FID:\s(\d+)$','SwitchType:\s(\w+)$','DomainID:\s(\d+)$','SwitchName:\s(.*)$','FabricName:\s(\w+)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)',''
-
-        $FOS_LoSwAdd_CFG = ((($FOS_MainInformation | Select-String -Pattern '\D\((\w+)\)$','switchWwn:\s(.*)$' -AllMatches).Matches.Value) -replace '^(\w+:\s)','').Trim()
+        $FOS_LoSw_CFG = ($FOS_MainInformation | Select-String -Pattern 'switchName:\s+(.*)$','switchDomain:\s+(\d+)$','switchWwn:\s+(.*)$','\D\((\w+)\)$','Fabric\sName:\s+(\w+)$' |ForEach-Object {$_.Matches.Groups[1].Value})
 
         <# add the values to the hashtable #>
-        $FOS_SwBasicInfos.Add('Swicht Name',$FOS_LoSw_CFG[3])
-        $FOS_SwBasicInfos.Add('Active ZonenCFG',$FOS_LoSwAdd_CFG[1].Trim('( )'))
-        $FOS_SwBasicInfos.Add('FabricName',$FOS_LoSw_CFG[4])
-        $FOS_SwBasicInfos.Add('DomainID',$FOS_LoSw_CFG[2])
-        $FOS_SwBasicInfos.Add('SwitchType',$FOS_LoSw_CFG[1])
-        $FOS_SwBasicInfos.Add('Switch WWN',$FOS_LoSwAdd_CFG[0])
-        $FOS_SwBasicInfos.Add('Fabric ID:',$FOS_LoSw_CFG[0])
+        $FOS_SwBasicInfos.Add('Swicht Name',$FOS_LoSw_CFG[0])
+        $FOS_SwBasicInfos.Add('Active ZonenCFG',$FOS_LoSw_CFG[3])
+        $FOS_SwBasicInfos.Add('Fabric Name',$FOS_LoSw_CFG[4])
+        $FOS_SwBasicInfos.Add('DomainID',$FOS_LoSw_CFG[1])
+        $FOS_SwBasicInfos.Add('Switch WWN',$FOS_LoSw_CFG[2])
+
+        <# Workaround if VF is not enabled #>
+        if(($FOS_MainInformation | Select-String -Pattern 'SwitchType:\s(\w+)$' |ForEach-Object {$_.Matches.Groups[1].Value}) -ne ("DS" -or "LS")) {
+            $FOS_SwBasicInfos.Add('SwitchType','DS')
+        }else {
+            $FOS_SwBasicInfos.Add('SwitchType',($FOS_MainInformation | Select-String -Pattern 'SwitchType:\s(\w+)$' |ForEach-Object {$_.Matches.Groups[1].Value}))
+        }
+        $FOS_SwBasicInfos.Add('Fabric ID',($FOS_MainInformation | Select-String -Pattern 'FID:\s(\d+)' |ForEach-Object {$_.Matches.Groups[1].Value}))
+        
     }
     end{
         <# returns the hashtable for further processing, not mandatory but the safe way #>

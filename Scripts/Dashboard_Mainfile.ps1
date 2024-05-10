@@ -65,12 +65,12 @@ function Dashboard_MainFuncion {
 
     #region HTML - Creation
     Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
-    Tab -Name "Info of $($FOS_UniqueSwitchInfo[0])" -IconSolid apple-alt -IconColor RedBerry {
+    Tab -Name "Info of $($FOS_UniqueSwitchInfo[0])" -IconSolid server -IconColor LightGreen {
             Section -Name "More Info 1" -Invisible {
                 Section -Name "Basic Information" {
                     Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_BasicSwitchInfo
                 }
-                Section -Name "FID Information" {
+                Section -Name "Advanced Information" {
                     Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_UniqueSwitchInfo
                 }
             }

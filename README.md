@@ -12,6 +12,7 @@ To Sart the function call: Open_Brocade_Dashboard
 ```powershell
 Install-Module -Name Dashboard_Kit -AllowClobber -AllowPrerelease -Force
 ```
+Force and AllowClobber aren't necessary but they do skip errors in case some appear.
 If the module is not activated automatically, then it is necessary to import it later, depending on the version of PowerShell (see Pic).
 ```powershell
 Import-Module Dashboard_Kit
@@ -25,8 +26,6 @@ Import-Module is a temporary installation, which will be deleted after closing t
 ```powershell
 Import-Module ".\Dashboard_Kit.psm1" -Force -NoClobber
 ```
-
-Force and AllowClobber aren't necessary but they do skip errors in case some appear.
 
 ### Updating
 ```powershell

@@ -146,11 +146,6 @@ function Dashboard_MainFuncion {
                 
             }
         }#>
-        <#
-        Tab -Name "Placeholder" {
-
-        }
-    #>
     }
 }
 

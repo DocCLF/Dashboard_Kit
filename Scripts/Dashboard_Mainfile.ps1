@@ -65,12 +65,12 @@ function Dashboard_MainFuncion {
 
     #region HTML - Creation
     Dashboard -Name "Brocade Testboard" -FilePath $Env:TEMP\Dashboard.html {
-    Tab -Name "Info of $($FOS_UniqueSwitchInfo[0])" -IconSolid apple-alt -IconColor RedBerry {
+    Tab -Name "Info of $($FOS_UniqueSwitchInfo[0])" -IconSolid server -IconColor LightGreen {
             Section -Name "More Info 1" -Invisible {
                 Section -Name "Basic Information" {
                     Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_BasicSwitchInfo
                 }
-                Section -Name "FID Information" {
+                Section -Name "Advanced Information" {
                     Table -HideFooter -HideButtons -DisablePaging -DisableSearch -DataTable $FOS_UniqueSwitchInfo
                 }
             }
@@ -187,6 +187,7 @@ function Open_Brocade_Dashboard {
             Write-Host "PSWriteHTML $Version is required to run the Brocade Dashboard Report.`nRun 'Install-Module -Name PSWriteHTML -RequiredVersion $Version -Force' to install the required modules." -ForegroundColor Red
             $UserImput = Read-Host "Or try to install automatically, type y or n"
             if($UserImput -eq "y"){
+                Write-Host "Please wait, an attempt will be made to install PSWriteHTML, this can take up to 30 seconds." -ForegroundColor Green
                 $InstallJob_PSWH = Start-Job -ScriptBlock {Install-Module -Name PSWriteHTML -RequiredVersion 1.17.0 -Force -Scope CurrentUser}
                 $InstallJob_PSWH | Wait-Job
             }else {
@@ -195,9 +196,7 @@ function Open_Brocade_Dashboard {
                 exit
             }
             if($InstallJob_PSWH.State -eq "Completed") {
-                Write-Host "`nThe installation of PSWriteHTML seems to have been successful, the function will now be closed.`nPlease restart powershell." -ForegroundColor Green
-                Start-Sleep -Seconds 8
-                exit
+                Write-Host "`nThe installation of PSWriteHTML seems to have been successful." -ForegroundColor Green
             }else {
                 Write-Host "`nSomething went wrong, please install PSWriteHTML manually using the ' Install-Module -Name PSWriteHTML -RequiredVersion 1.17.0 -Force -Scope CurrentUser ' command.`nThe application will now be closed." -ForegroundColor Red
                 Start-Sleep -Seconds 8
@@ -237,11 +236,11 @@ function Open_Brocade_Dashboard {
             $IPAddress = $DeviceCredantail.IPAddress
             if($DeviceCredantail.Protocol -eq 'plink'){
                 Write-Debug -Message "Start with Plink `n $DeviceCredantail `n"
-                #$Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
-                $FOS_CollectedDeviceInfo = plink $UserName@$IPAddress -pw $Encrypted -batch "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+                $Encrypted = ConvertFrom-SecureString -SecureString $DeviceCredantail.Password -AsPlainText
+                $FOS_CollectedDeviceInfo = plink $UserName@$IPAddress -pw $Encrypted -batch "firmwareshow && ipaddrshow && switchshow && porterrshow && portbuffershow && zoneshow"
             }else {
                 Write-Debug -Message "Start with ssh `n $DeviceCredantail `n"
-                $FOS_CollectedDeviceInfo = ssh $UserName@$IPAddress "firmwareshow && ipaddrshow && lscfg --show -n && switchshow && porterrshow && portbuffershow && zoneshow"
+                $FOS_CollectedDeviceInfo = ssh $UserName@$IPAddress "firmwareshow && ipaddrshow && switchshow && porterrshow && portbuffershow && zoneshow"
             }
 
             Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"

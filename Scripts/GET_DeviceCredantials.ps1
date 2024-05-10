@@ -75,7 +75,7 @@ function GET_DeviceCredantials {
             $CredantialsCollect.Add('UserName',$UserName) 
 
             if($Protocol -eq "plink"){
-                $UserPassword = Read-Host "Enter the Password of the device"
+                $UserPassword = Read-Host "Enter the Password of the device" -MaskInput
                 $UserPassword = ConvertTo-SecureString -String $UserPassword -AsPlainText
                 $CredantialsCollect.Add('Password',$UserPassword)
             }

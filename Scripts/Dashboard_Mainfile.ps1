@@ -185,6 +185,7 @@ function Open_Brocade_Dashboard {
                 Write-Host "Please wait, an attempt will be made to install PSWriteHTML, this can take up to 30 seconds." -ForegroundColor Green
                 $InstallJob_PSWH = Start-Job -ScriptBlock {Install-Module -Name PSWriteHTML -RequiredVersion 1.17.0 -Force -Scope CurrentUser}
                 $InstallJob_PSWH | Wait-Job
+		Import-Module PSWriteHTML
             }else {
                 Write-Host "`nFurther execution of the function is terminated, in 5s" -ForegroundColor Red
 		        Start-Sleep -seconds 6

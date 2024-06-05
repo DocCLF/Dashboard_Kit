@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:GUI"
         mc:Ignorable="d"
         
-        Title="MainWindow" Height="150" Width="700" Left="650" Top="10">
+        Title="MainWindow" Height="150" Width="900" Left="650" Top="10">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -37,7 +37,7 @@
             <!--Visibile if one Athlet is markt as currentathlet-->
             <Button
                 x:Name="btn_IBM_HostVolumeMap"
-                Grid.Column="1"
+                Grid.Column="2"
                 Height="30"
                 Width="150"
                 Margin="10"
@@ -47,7 +47,7 @@
             <!--Collection of all useable Workouts-->
             <Button
                 x:Name="btn_IBM_DriveInfo"
-                Grid.Column="2"
+                Grid.Column="3"
                 Height="30"
                 Width="150"
                 Margin="10"
@@ -57,7 +57,7 @@
             <!--Collection of all useable Events-->
             <Button
                 x:Name="btn_IBM_FCPortStats"
-                Grid.Column="3"
+                Grid.Column="4"
                 Height="30"
                 Width="150"
                 Margin="10"

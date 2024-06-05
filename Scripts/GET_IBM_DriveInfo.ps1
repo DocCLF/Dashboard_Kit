@@ -107,6 +107,9 @@ function GET_IBM_DriveInfo {
         if($TD_export -eq "yes"){
             <# exported to .\Drive_Overview_(Date).csv #>
             $TD_DriveOverview | Export-Csv -Path .\$($TD_NodeSplitInfo.NodeName)_Drive_Overview_$(Get-Date -Format "yyyy-MM-dd").csv -NoTypeInformation
+            $TD_FileInfo=Get-ChildItem $($TD_NodeSplitInfo.NodeName)_Drive_Overview_$(Get-Date -Format "yyyy-MM-dd").csv -Recurse -ErrorAction SilentlyContinue
+            $TD_FileLocation=$TD_FileInfo.DirectoryName
+            Write-Host "The Export can be found at $TD_FileLocation " -ForegroundColor Green
             Start-Sleep -Seconds 1
             Invoke-Item ".\$($TD_NodeSplitInfo.NodeName)_Drive_Overview_$(Get-Date -Format "yyyy-MM-dd").csv"
         }else {

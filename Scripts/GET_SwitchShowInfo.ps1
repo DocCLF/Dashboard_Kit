@@ -45,6 +45,8 @@ function GET_SwitchShowInfo {
     process {
 
         Write-Debug -Message "Process Func GET_SwitchShowInfo |$(Get-Date)`n "
+        <# fill the var with a dummy #>
+        $FOS_PortConnect = "empty"
 
         foreach($FOS_linebyLine in $FOS_SwShowArry_temp){
 
@@ -69,7 +71,13 @@ function GET_SwitchShowInfo {
                 <# Protocol support by GbE port. #>
                 $FOS_SWsh.Proto = ($FOS_linebyLine |Select-String -Pattern '(\w+_\w+|\w+)\s+(FC)' -AllMatches).Matches.Groups.Value[2]
                 <# WWPN or other Infos #>
-                $FOS_SWsh.PortConnect = $FOS_linebyLine.Substring(50).Trim() <# in some environments it may be necessary to switch from 50 to 48, especially when using the egde as default browser #>
+                $FOS_PortConnect = ($FOS_linebyLine |Select-String -Pattern '(E-Port\s+([0-9a-f]{2}:){7}[0-9a-f]{2}\s+.*\))' -AllMatches).Matches.Groups.Value[1]
+                If($FOS_PortConnect -ne "empty"){
+                    $FOS_SWsh.PortConnect =$FOS_PortConnect
+                    $FOS_PortConnect = "empty"
+                }else{
+                    $FOS_SWsh.PortConnect = ($FOS_linebyLine |Select-String -Pattern '\s+(FC)\s+([A-Za-z-]+\s+([0-9a-f]{2}:){7}[0-9a-f]{2}|\(.*\)|[A-Za-z-]+.*)' -AllMatches).Matches.Groups.Value[2]
+                }
                 $FOS_SwBasicPortDetails += $FOS_SWsh
             }
 

@@ -241,16 +241,16 @@ function Open_Brocade_Dashboard {
             Write-Debug -Message "List of devices with access`n $DeviceCredantail `n"
 
             <# The bottom line is used for testing/ debuging #>
-            #$FOS_CollectedDeviceInfo = Get-Content -Path ".\sw1_col.txt"
+            #$FOS_CollectedDeviceInfo = Get-Content -Path ".\Documents\sw2_col.txt"
             <#----------------------- DataCollect ------------------#>
-
+            Write-Debug -Message "All collected Data:`n $FOS_CollectedDeviceInfo "
 
             Write-Debug -Message "Call the Dashboard_MainFuncion |$(Get-Date)`n"
             Dashboard_MainFuncion -FOS_CollectedDeviceInfos $FOS_CollectedDeviceInfo
             Write-Debug -Message "Dashboard_MainFuncion, done |$(Get-Date)`n"
             Start-Sleep -Seconds 1
             Write-Host "Dashboard incoming, please wait..." -ForegroundColor Green
-            Start-Sleep -Seconds 2
+            Start-Sleep -Seconds 1
             Write-Debug -Message "call $Env:TEMP\Dashboard.html |$(Get-Date)`n"
             Start-Process -FilePath $Env:TEMP\Dashboard.html
             Write-Debug -Message "Dashboard $($DeviceCredantail.id) `n"

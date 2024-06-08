@@ -14,29 +14,44 @@ All notable changes to the "Dashboard_Kit" Module will be documented in this fil
 * include the possibility of comparisons with older data ( trend over periodtime).
 * Possibilities of integrating an automatic service (Win & later other OS)
 
+## 0.1.0 beta
+### Saturday, June 08, 2024
+Improvemnt:
+* Code optimization for Port Basic show -> PortConnect
 
-## 0.0.2
+Fixed:
+* Switch Fabric OS was not displayed 
+* PortConnect was displayed incorrectly 
+
+Removed:
+* Temporary removed - support for VF, this part needs a complete overhaul.
+* Clean up Readme
+
+Known Issues
+* Zone Information in in combination with FOS older then 8.1.x may sometimes makes an incorrect assignment between WWPN and alias, but this only affects host aliases
+    * the view zone in combination with WWPNs, on the other hand, is correct
+
+## 0.0.2 alpha
 ### Friday, May 10, 2024
 Added:
-* added, some older Switch Typs
-* added, MaskInput for Password
+* some older Switch Typs
+* MaskInput for Password
 
 Improvemnt:
 * updated, readme file for installation
 * removed, unnecessary lines of code 
 
-Bugfixes:
-* fixed, Password problem with plink connection
-* fixed, ordering of the values in a hastable to display the basic and adv. switch info
-* fixed, update some write-host text
-* fixed, language translation error
+Fixed:
+* Password problem with plink connection
+* ordering of the values in a hastable to display the basic and adv. switch info
+* update some write-host text
+* language translation error
 
 Removed:
 * Temporary removed - support for VF, this part needs a complete overhaul.
 
-## 0.0.1
+## 0.0.1 alpha
 ### Friday, May 03, 2024
-
 Initial release with the following features:
 
 * initial release

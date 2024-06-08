@@ -46,9 +46,6 @@ That's it. Whenever there's a new version you simply run the command and you can
 [PSWriteHTML]: https://github.com/EvotecIT/PSWriteHTML
 
 ## Known Issues
-
-* Some information may not be displayed completely, depending on the browser
-* Information may be missing for switches with a FOS older than 8.2.x 
 * It can lead to error messages due to user rights within the powershell
     * To run the script you may have to enter the following line in Powershell before you can use the script.\
       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser\

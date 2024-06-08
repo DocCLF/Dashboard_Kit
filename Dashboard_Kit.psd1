@@ -12,10 +12,10 @@
 RootModule = 'Dashboard_Kit.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.2'
+ModuleVersion = '0.1.0'
 
 # Supported PSEditions
-CompatiblePSEditions = @('Desktop')
+CompatiblePSEditions = @('Desktop', 'Core')
 
 # ID used to uniquely identify this module
 GUID = '93d07539-d865-4a63-81fb-0cdb5eb1ad9b'
@@ -115,7 +115,7 @@ PrivateData = @{
         ReleaseNotes = 'https://github.com/DocCLF/Dashboard_Kit/blob/main/CHANGELOG.md'
 
         # Prerelease string of this module
-        Prerelease = 'alpha'
+        Prerelease = 'beta'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
         # RequireLicenseAcceptance = $false
